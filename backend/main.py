@@ -7,6 +7,7 @@ import asyncio
 import networkx as nx
 from typing import List, Tuple
 from pydantic import BaseModel
+import subprocess
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -340,6 +341,134 @@ async def get_emergency_route(req: EmergencyRouteRequest):
         }
     except nx.NetworkXNoPath: raise HTTPException(status_code=404, detail="No path found")
     except Exception as e: raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/si-insights")
+async def get_si_insights():
+    if not MISTRAL_API_KEY:
+        raise HTTPException(status_code=503, detail="Mistral API key not configured")
+
+    def get_git_file_content(commit_hash, file_path):
+        try:
+            # Normalize file path for git (forward slashes)
+            git_path = file_path.replace("\\", "/")
+            if "frontend/public" in git_path:
+                git_path = git_path.split("frontend/public/")[1]
+                git_path = f"frontend/public/{git_path}"
+            
+            result = subprocess.run(
+                ["git", "show", f"{commit_hash}:{git_path}"],
+                capture_output=True, text=True, check=True, cwd=os.path.join(os.path.dirname(__file__), "..")
+            )
+            return json.loads(result.stdout)
+        except Exception as e:
+            print(f"Error fetching git file {file_path} at {commit_hash}: {e}")
+            return None
+
+    def get_last_sync_commits():
+        try:
+            result = subprocess.run(
+                ["git", "log", "--author=github-actions[bot]", "--pretty=format:%H", "-n", "2"],
+                capture_output=True, text=True, check=True, cwd=os.path.join(os.path.dirname(__file__), "..")
+            )
+            return result.stdout.split("\n")
+        except Exception:
+            return []
+
+    commits = get_last_sync_commits()
+    if len(commits) < 2:
+        # Fallback if not enough commits, compare current with last sync if available
+        last_commit = commits[0] if commits else "HEAD"
+        prev_commit = "HEAD~1" 
+    else:
+        last_commit, prev_commit = commits[0], commits[1]
+
+    # Compare traffic, bus, and metro data
+    files_to_compare = {
+        "traffic": "frontend/public/data/live_traffic.json",
+        "bus": "frontend/public/data/bus_data.json",
+        "metro": "frontend/public/data/metro_data.json"
+    }
+
+    comparison_results = {}
+    for key, path in files_to_compare.items():
+        curr_data = get_git_file_content(last_commit, path)
+        prev_data = get_git_file_content(prev_commit, path)
+        
+        if not curr_data or not prev_data:
+            comparison_results[key] = "Insufficient data for comparison"
+            continue
+
+        if key == "traffic":
+            curr_count = len(curr_data.get("features", []))
+            prev_count = len(prev_data.get("features", []))
+            comparison_results[key] = {
+                "current_segments": curr_count,
+                "previous_segments": prev_count,
+                "delta": curr_count - prev_count
+            }
+        elif key == "bus":
+            curr_stops = len(curr_data.get("stops", []))
+            prev_stops = len(prev_data.get("stops", []))
+            comparison_results[key] = {
+                "current_stops": curr_stops,
+                "previous_stops": prev_stops,
+                "delta": curr_stops - prev_stops
+            }
+        elif key == "metro":
+            curr_lines = len(curr_data.get("lines", []))
+            prev_lines = len(prev_data.get("lines", []))
+            comparison_results[key] = {
+                "current_lines": curr_lines,
+                "previous_lines": prev_lines,
+                "delta": curr_lines - prev_lines
+            }
+
+    # Generate AI Report
+    system_prompt = f"""You are the NagarIQ Smart City Analyst. 
+Analyze the following data comparison between two city state snapshots (from auto-sync commits).
+Generate a professional, insightful "City Pulse Report" for Nagpur.
+Focus on what these changes mean for urban mobility and efficiency.
+Format with markdown headers and bullet points.
+
+Comparison Data:
+{json.dumps(comparison_results, indent=2)}
+"""
+
+    url = "https://api.mistral.ai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {MISTRAL_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "mistral-large-latest",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": "Generate a detailed SI Insight report for Nagpur based on the latest sync deltas."}
+        ]
+    }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=headers, json=payload, timeout=30.0)
+            if response.status_code == 200:
+                data = response.json()
+                report = data["choices"][0]["message"]["content"]
+                return {
+                    "comparison": comparison_results,
+                    "report": report,
+                    "commits": {"current": last_commit, "previous": prev_commit}
+                }
+            else:
+                return {
+                    "comparison": comparison_results,
+                    "report": "Failed to generate AI report due to API error.",
+                    "error": response.text
+                }
+    except Exception as e:
+        return {
+            "comparison": comparison_results,
+            "report": f"Failed to communicate with Mistral AI: {str(e)}"
+        }
 
 @app.post("/api/ask-ai")
 async def ask_ai(req: AIQueryRequest):
