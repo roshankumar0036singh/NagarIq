@@ -123,7 +123,7 @@ const Dashboard = () => {
           delay={0.5}
         />
       </div>
-
+      
       {/* Charts Section */}
       <div className="dashboard-grid-large" style={{ marginTop: '2rem' }}>
         <TrafficChart data={data.traffic} />

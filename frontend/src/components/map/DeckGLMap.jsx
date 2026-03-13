@@ -6,6 +6,8 @@ import { PathStyleExtension } from '@deck.gl/extensions';
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import { Map } from 'react-map-gl/maplibre';
 import { LightingEffect, AmbientLight, PointLight } from '@deck.gl/core';
+import { AnimatePresence } from 'framer-motion';
+import JourneyImpact from '../ui/JourneyImpact';
 
 // Viewport settings for Nagpur - Cinematic Low Angle
 const INITIAL_VIEW_STATE = {
@@ -41,7 +43,9 @@ const DeckGLMap = () => {
   const [endPoint, setEndPoint] = useState(null);
   const [optimalPath, setOptimalPath] = useState(null);
   const [alternativePath, setAlternativePath] = useState(null);
+  const [multiModalSegments, setMultiModalSegments] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
+  const [showImpact, setShowImpact] = useState(false);
 
   // Emergency Mode states
   const [emergencyMode, setEmergencyMode] = useState(false);
@@ -83,8 +87,8 @@ const DeckGLMap = () => {
     return trafficData.features.filter(f => {
       const mode = f.properties.modalType;
       if (selectedMode === 'car') return mode === 'car';
-      if (selectedMode === 'cycle') return mode === 'cycle' || mode === 'car'; // cycles can use both
-      if (selectedMode === 'pedestrian') return true; // pedestrians can use anything in this demo
+      if (selectedMode === 'cycle') return mode === 'cycle' || mode === 'bike'; // cycles use bike/cycle paths
+      if (selectedMode === 'pedestrian') return true; // pedestrians use any connectivity
       if (selectedMode === 'bike') return mode === 'bike' || mode === 'car';
       return true;
     });
@@ -106,14 +110,22 @@ const DeckGLMap = () => {
 
   const calculateRoute = async (start, end) => {
     setRoutingState('calculating');
+    setShowImpact(false);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/route', {
+      const endpoint = selectedMode === 'multi-modal' ? '/api/multi-modal-route' : '/api/route';
+      const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ start, end, mode: selectedMode })
       });
       const data = await response.json();
-      if (data.optimal) {
+      
+      if (selectedMode === 'multi-modal' && data.multiModal) {
+        setMultiModalSegments(data.multiModal.segments);
+        setRouteInfo(data);
+        setRoutingState('resolved');
+        setShowImpact(true);
+      } else if (data.optimal) {
         setOptimalPath(data.optimal.path);
         setAlternativePath(data.alternative.path);
         setRouteInfo({
@@ -277,6 +289,24 @@ const DeckGLMap = () => {
         blendEquation: 32774
       }
     }),
+
+    // 4c. Multi-Modal Segments
+    multiModalSegments && multiModalSegments.map((seg, i) => (
+      new PathLayer({
+        id: `multi-modal-seg-${i}`,
+        data: [{ path: seg.path }],
+        getPath: d => d.path,
+        getColor: seg.mode === 'car' ? [245, 158, 11] : seg.mode === 'metro' ? [255, 255, 255] : [16, 185, 129],
+        getWidth: seg.mode === 'metro' ? 10 : 8,
+        widthMinPixels: 6,
+        getDashArray: seg.mode === 'walk' ? [4, 4] : [0, 0],
+        extensions: seg.mode === 'walk' ? [new PathStyleExtension({ dash: true })] : [],
+        parameters: {
+          blendFunc: [770, 1],
+          blendEquation: 32774
+        }
+      })
+    )),
 
     // 4b. Alternative Route Layer (Dotted)
     alternativePath && new PathLayer({
@@ -539,25 +569,28 @@ const DeckGLMap = () => {
           >
             METRO: {showMetro ? 'ON' : 'OFF'}
           </button>
-          {['car', 'bike', 'cycle', 'pedestrian', 'bus'].map(mode => (
+          {['car', 'bike', 'cycle', 'pedestrian', 'bus', 'multi-modal'].map(mode => (
             <button
               key={mode}
               onClick={() => {
                 setSelectedMode(mode);
                 setOptimalPath(null);
+                setMultiModalSegments(null);
                 setRoutingState(null);
+                setShowImpact(false);
               }}
               style={{
-                background: selectedMode === mode ? '#10B981' : 'transparent',
-                color: selectedMode === mode ? 'black' : 'white',
-                border: 'none',
+                background: selectedMode === mode ? (mode === 'multi-modal' ? '#3B82F6' : '#10B981') : 'transparent',
+                color: selectedMode === mode ? 'white' : 'white',
+                border: selectedMode === mode ? 'none' : '1px solid rgba(255,255,255,0.1)',
                 padding: '0.5rem 1rem',
                 borderRadius: '12px',
                 fontSize: '0.7rem',
                 fontFamily: "'Roboto Mono', monospace",
                 cursor: 'pointer',
                 textTransform: 'uppercase',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                fontWeight: selectedMode === mode ? 700 : 400
               }}
             >
               {mode}
@@ -622,8 +655,10 @@ const DeckGLMap = () => {
             onClick={() => {
               setRoutingState('picking-start');
               setOptimalPath(null);
+              setMultiModalSegments(null);
               setStartPoint(null);
               setEndPoint(null);
+              setShowImpact(false);
             }}
             style={{
               background: '#F59E0B',
@@ -638,7 +673,7 @@ const DeckGLMap = () => {
               boxShadow: '0 10px 30px rgba(245,158,11,0.2)'
             }}
           >
-            PLAN OPTIMAL ROUTE
+            {selectedMode === 'multi-modal' ? 'EVOLVE JOURNEY' : 'PLAN OPTIMAL ROUTE'}
           </button>
         )}
 
@@ -670,8 +705,10 @@ const DeckGLMap = () => {
                 onClick={() => {
                   setRoutingState(null);
                   setOptimalPath(null);
+                  setMultiModalSegments(null);
                   setStartPoint(null);
                   setEndPoint(null);
+                  setShowImpact(false);
                 }}
                 style={{
                   background: 'rgba(255,255,255,0.05)',
@@ -705,79 +742,6 @@ const DeckGLMap = () => {
             )}
           </div>
         )}
-
-        {/* Live Arrival Feed Panel */}
-        {selectedMode === 'bus' && selectedStop && busData && busData.arrivals && busData.arrivals[selectedStop.id] && (
-          <div style={{
-            background: 'rgba(2, 6, 23, 0.85)',
-            padding: '1.5rem',
-            borderRadius: '24px',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            backdropFilter: 'blur(24px)',
-            color: 'white',
-            fontFamily: "'Inter', 'Roboto Mono', sans-serif",
-            marginTop: '1rem',
-            minWidth: '300px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div>
-                <div style={{ fontSize: '0.65rem', color: '#10B981', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Live Feed</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 600, marginTop: '0.2rem' }}>{selectedStop.name}</div>
-              </div>
-              <button 
-                onClick={(e) => { e.stopPropagation(); setSelectedStop(null); }}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '1.2rem' }}
-              >
-                &times;
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {busData.arrivals[selectedStop.id].length > 0 ? (
-                 busData.arrivals[selectedStop.id].map((arrival, idx) => (
-                   <div key={idx} style={{ 
-                     display: 'flex', 
-                     alignItems: 'center', 
-                     justifyContent: 'space-between',
-                     padding: '0.75rem',
-                     background: 'rgba(255,255,255,0.03)',
-                     borderRadius: '12px',
-                     border: '1px solid rgba(255,255,255,0.05)'
-                   }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{ 
-                          background: '#3B82F6', 
-                          color: 'white', 
-                          fontWeight: 700, 
-                          padding: '0.3rem 0.5rem', 
-                          borderRadius: '8px',
-                          fontSize: '0.75rem',
-                          fontFamily: "'Roboto Mono', monospace"
-                        }}>
-                          {arrival.routeId}
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>{arrival.routeName}</div>
-                          <div style={{ fontSize: '0.65rem', color: arrival.status === 'Delayed' ? '#EF4444' : '#10B981', marginTop: '0.1rem' }}>
-                            {arrival.status} • {arrival.time}
-                          </div>
-                        </div>
-                     </div>
-                     <div style={{ textAlign: 'right', fontFamily: "'Roboto Mono', monospace" }}>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 700, color: arrival.wait <= 5 ? '#F59E0B' : 'white' }}>
-                          {arrival.wait} <span style={{ fontSize: '0.6rem', fontWeight: 400, opacity: 0.6 }}>MIN</span>
-                        </div>
-                     </div>
-                   </div>
-                 ))
-              ) : (
-                <div style={{ textAlign: 'center', padding: '1rem', opacity: 0.5, fontSize: '0.8rem' }}>No upcoming arrivals</div>
-              )}
-            </div>
-          </div>
-        )}
-
       </div>
       
       {/* HUD: City Telemetry (Minimal Corner Overlays) */}
@@ -1029,6 +993,21 @@ const DeckGLMap = () => {
           </div>
         </div>
       )}
+
+      {/* Journey Impact Dashboard Overlay */}
+      <AnimatePresence>
+        {showImpact && routeInfo && (
+          <JourneyImpact 
+            savings={routeInfo.savings} 
+            totalMetrics={{
+              co2: routeInfo.multiModal.co2,
+              cost: routeInfo.multiModal.cost,
+              station: routeInfo.multiModal.segments.find(s => s.mode === 'metro')?.station
+            }}
+            onClose={() => setShowImpact(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

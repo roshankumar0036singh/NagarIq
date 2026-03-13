@@ -71,10 +71,17 @@ def build_traffic_graph(mode: str):
         
         segment_mode = props.get('modalType', 'car')
         # Mode-based filtering logic
-        if mode in ['car', 'bus'] and segment_mode in ['cycle', 'pedestrian']:
+        # Cycle mode treats bike segments as valid if no cycle segments found
+        if mode == 'cycle':
+            if segment_mode not in ['cycle', 'bike']:
+                continue
+        elif mode in ['car', 'bus'] and segment_mode in ['cycle', 'pedestrian']:
             continue
-        if mode == 'cycle' and segment_mode == 'pedestrian':
-            continue
+        elif mode == 'pedestrian':
+            # Pedestrians can use everything in this model to ensure connectivity
+            pass
+        elif mode == 'bike' and segment_mode == 'cycle':
+            continue # specific cycleways might not be for bikes, but car roads are usually fine
         # bike (two-wheeler) can go almost anywhere car goes, but car can't go through cycleways
         
         coords = geom['coordinates']
@@ -452,7 +459,7 @@ Comparison Data:
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, json=payload, timeout=30.0)
+            response = await client.post(url, headers=headers, json=payload, timeout=60.0)
             if response.status_code == 200:
                 data = response.json()
                 report = data["choices"][0]["message"]["content"]

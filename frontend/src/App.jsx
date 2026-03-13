@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Dashboard from './components/Dashboard';
+import SIInsightLayer from './components/SIInsightLayer';
 import DeckGLMap from './components/map/DeckGLMap';
 import GrievanceMap from './components/map/GrievanceMap';
-import { LayoutDashboard, Settings, Map, Activity, Zap, Droplets, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Settings, Map, Activity, Zap, Droplets, AlertCircle, Sparkles } from 'lucide-react';
 import './index.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
     { id: 'energy', label: 'Energy Grid', icon: Zap },
     { id: 'water', label: 'Water Systems', icon: Droplets },
     { id: 'grievances', label: 'Grievances', icon: AlertCircle },
+    { id: 'insights', label: 'SI Insights', icon: Sparkles },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -27,6 +29,8 @@ function App() {
         return <DeckGLMap />;
       case 'grievances':
         return <GrievanceMap />;
+      case 'insights':
+        return <SIInsightLayer />;
       default:
         return (
           <div className="glass-panel flex-center" style={{ minHeight: '60vh' }}>
