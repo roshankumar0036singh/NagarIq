@@ -33,8 +33,8 @@ def main():
             status = run_command("git status --porcelain")
             if status:
                 run_command(f'git commit -m "Heartbeat: {timestamp}"')
-                # Pull changes from remote to avoid "fetch first" errors
-                run_command("git pull --rebase origin main")
+                # Pull changes from remote and resolve conflicts by favoring local heartbeat
+                run_command("git pull --rebase -X theirs origin main")
                 run_command("git push origin main")
                 print(f"Pushed heartbeat at {timestamp}")
             else:
