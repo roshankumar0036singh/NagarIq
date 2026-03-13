@@ -40,7 +40,7 @@ export const TrafficChart = ({ data }) => {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="time" stroke="hsl(var(--text-secondary))" tick={{fill: 'hsl(var(--text-secondary))', fontSize: 12}} axisLine={false} tickLine={false} />
+            <XAxis dataKey="time" type="category" stroke="hsl(var(--text-secondary))" tick={{fill: 'hsl(var(--text-secondary))', fontSize: 12}} axisLine={false} tickLine={false} />
             <YAxis stroke="hsl(var(--text-secondary))" tick={{fill: 'hsl(var(--text-secondary))', fontSize: 12}} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ paddingTop: '10px' }} />
