@@ -1,0 +1,435 @@
+{
+  "metadata": {
+    "generated_at": "2026-03-13T13:42:53.693657",
+    "city": "Nagpur"
+  },
+  "stops": [
+    {
+      "id": "stop-001",
+      "name": "Sitabuldi Interchange",
+      "coords": [
+        79.0882,
+        21.1458
+      ]
+    },
+    {
+      "id": "stop-002",
+      "name": "Pardi Square",
+      "coords": [
+        79.15,
+        21.16
+      ]
+    },
+    {
+      "id": "stop-003",
+      "name": "Hingna T-Point",
+      "coords": [
+        79.0,
+        21.11
+      ]
+    },
+    {
+      "id": "stop-004",
+      "name": "Koradi Temple",
+      "coords": [
+        79.09,
+        21.25
+      ]
+    },
+    {
+      "id": "stop-005",
+      "name": "Automotive Square",
+      "coords": [
+        79.0882,
+        21.2
+      ]
+    },
+    {
+      "id": "stop-006",
+      "name": "Airport South",
+      "coords": [
+        79.0882,
+        21.085
+      ]
+    },
+    {
+      "id": "stop-007",
+      "name": "Kamptee Road",
+      "coords": [
+        79.2,
+        21.22
+      ]
+    },
+    {
+      "id": "stop-008",
+      "name": "Wadi Naka",
+      "coords": [
+        78.95,
+        21.16
+      ]
+    },
+    {
+      "id": "stop-009",
+      "name": "Dharampeth",
+      "coords": [
+        79.065,
+        21.14
+      ]
+    },
+    {
+      "id": "stop-010",
+      "name": "Medical Square",
+      "coords": [
+        79.095,
+        21.125
+      ]
+    }
+  ],
+  "buses": [
+    {
+      "id": "bus-101-0",
+      "routeId": "101",
+      "routeName": "Pardi - Hingna",
+      "position": [
+        79.06314734245271,
+        21.139144927285866
+      ],
+      "nextStop": "stop-003",
+      "occupancy": 28,
+      "delay": -2
+    },
+    {
+      "id": "bus-101-1",
+      "routeId": "101",
+      "routeName": "Pardi - Hingna",
+      "position": [
+        79.14702520794417,
+        21.15931647172827
+      ],
+      "nextStop": "stop-001",
+      "occupancy": 14,
+      "delay": 5
+    },
+    {
+      "id": "bus-202-0",
+      "routeId": "202",
+      "routeName": "Koradi - Airport",
+      "position": [
+        79.08995789076697,
+        21.248830299082236
+      ],
+      "nextStop": "stop-005",
+      "occupancy": 50,
+      "delay": -1
+    },
+    {
+      "id": "bus-202-1",
+      "routeId": "202",
+      "routeName": "Koradi - Airport",
+      "position": [
+        79.0882,
+        21.146199440741032
+      ],
+      "nextStop": "stop-001",
+      "occupancy": 16,
+      "delay": 7
+    },
+    {
+      "id": "bus-303-0",
+      "routeId": "303",
+      "routeName": "Kamptee - Wadi",
+      "position": [
+        79.0882,
+        21.156530312086876
+      ],
+      "nextStop": "stop-001",
+      "occupancy": 43,
+      "delay": 6
+    },
+    {
+      "id": "bus-303-1",
+      "routeId": "303",
+      "routeName": "Kamptee - Wadi",
+      "position": [
+        79.03749805038561,
+        21.151009606979194
+      ],
+      "nextStop": "stop-008",
+      "occupancy": 29,
+      "delay": -2
+    }
+  ],
+  "arrivals": {
+    "stop-001": [
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "13:53",
+        "wait": 11,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "13:54",
+        "wait": 12,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "13:56",
+        "wait": 14,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "14:05",
+        "wait": 23,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "14:05",
+        "wait": 23,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "14:07",
+        "wait": 25,
+        "status": "Delayed"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "14:19",
+        "wait": 37,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "14:21",
+        "wait": 39,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "14:21",
+        "wait": 39,
+        "status": "On Time"
+      }
+    ],
+    "stop-002": [
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "13:54",
+        "wait": 12,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "14:09",
+        "wait": 27,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "14:20",
+        "wait": 38,
+        "status": "On Time"
+      }
+    ],
+    "stop-003": [
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "13:52",
+        "wait": 10,
+        "status": "Delayed"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "14:07",
+        "wait": 25,
+        "status": "Delayed"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "14:20",
+        "wait": 38,
+        "status": "On Time"
+      }
+    ],
+    "stop-004": [
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "13:51",
+        "wait": 9,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "14:09",
+        "wait": 27,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "14:20",
+        "wait": 38,
+        "status": "On Time"
+      }
+    ],
+    "stop-005": [
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "13:57",
+        "wait": 15,
+        "status": "Delayed"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "13:57",
+        "wait": 15,
+        "status": "Delayed"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "14:04",
+        "wait": 22,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "14:04",
+        "wait": 22,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "14:20",
+        "wait": 38,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "14:20",
+        "wait": 38,
+        "status": "On Time"
+      }
+    ],
+    "stop-006": [
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "13:54",
+        "wait": 12,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "14:05",
+        "wait": 23,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "14:19",
+        "wait": 37,
+        "status": "On Time"
+      }
+    ],
+    "stop-007": [
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "13:55",
+        "wait": 13,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "14:08",
+        "wait": 26,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "14:17",
+        "wait": 35,
+        "status": "Delayed"
+      }
+    ],
+    "stop-008": [
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "13:55",
+        "wait": 13,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "14:08",
+        "wait": 26,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "14:17",
+        "wait": 35,
+        "status": "Delayed"
+      }
+    ],
+    "stop-009": [
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "13:57",
+        "wait": 15,
+        "status": "Delayed"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "14:06",
+        "wait": 24,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "14:17",
+        "wait": 35,
+        "status": "Delayed"
+      }
+    ],
+    "stop-010": []
+  }
+}

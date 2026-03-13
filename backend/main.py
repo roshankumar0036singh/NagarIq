@@ -28,6 +28,7 @@ OWM_API_KEY = os.getenv("OWM_API_KEY", "")
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "data", "city_data.json")
 TRAFFIC_DATA_PATH = os.path.join(os.path.dirname(__file__), "../frontend/public/data/live_traffic.json")
+METRO_DATA_PATH = os.path.join(os.path.dirname(__file__), "../frontend/public/data/metro_data.json")
 
 class RouteRequest(BaseModel):
     start: Tuple[float, float] # [lon, lat]
@@ -55,23 +56,37 @@ def build_traffic_graph(mode: str):
         geom = feature['geometry']
         
         segment_mode = props.get('modalType', 'car')
-        if mode == 'car' and segment_mode in ['cycle', 'pedestrian']:
+        # Mode-based filtering logic
+        if mode in ['car', 'bus'] and segment_mode in ['cycle', 'pedestrian']:
             continue
         if mode == 'cycle' and segment_mode == 'pedestrian':
             continue
+        # bike (two-wheeler) can go almost anywhere car goes, but car can't go through cycleways
         
         coords = geom['coordinates']
         for i in range(len(coords) - 1):
             p1 = tuple(coords[i][:2])
             p2 = tuple(coords[i+1][:2])
+            # Use distance as base weight
             dist = ((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)**0.5
             congestion = props.get('congestion', 0.1)
-            weight = dist * (1 + congestion * 5) 
-            G.add_edge(p1, p2, weight=weight, name=props.get('name'))
-    return G
+            # Add congestion penalty to weight
+            weight = dist * (1 + congestion * 10) 
+            G.add_edge(p1, p2, weight=weight)
+
+    if len(G.nodes()) == 0:
+        return None
+
+    # Crucial: Return the largest connected component to ensure connectivity
+    components = sorted(nx.connected_components(G), key=len, reverse=True)
+    G_main = G.subgraph(components[0]).copy()
+    print(f"Graph built for {mode}: {len(G.nodes())} nodes, {len(G.edges())} edges. LCC: {len(G_main.nodes())} nodes.")
+    return G_main
 
 def find_nearest_node(G, point):
     nodes = list(G.nodes())
+    if not nodes:
+        return None
     return min(nodes, key=lambda n: (n[0]-point[0])**2 + (n[1]-point[1])**2)
 
 async def fetch_cpcb_aqi():
@@ -137,9 +152,32 @@ def read_root():
 def get_overview():
     return load_fallback_data().get("kpis", {})
 
+@app.get("/api/metro-metrics")
+async def get_metro_metrics():
+    if not os.path.exists(METRO_DATA_PATH):
+        raise HTTPException(status_code=404, detail="Metro data not available")
+    with open(METRO_DATA_PATH, "r") as f:
+        return json.load(f)
+
 @app.get("/api/all-metrics")
 async def get_all_metrics():
     environment, traffic = await asyncio.gather(fetch_cpcb_aqi(), fetch_tomtom_traffic())
+    
+    metro_summary = {"status": "Operational", "ridership": 24500}
+    metro_history = []
+    if os.path.exists(METRO_DATA_PATH):
+        with open(METRO_DATA_PATH, "r") as f:
+            metro_data = json.load(f)
+            total_ridership = sum(s.get('ridership', 0) for s in metro_data.get('stations', []))
+            maintenance_count = sum(1 for s in metro_data.get('stations', []) if s.get('status') == 'Maintenance')
+            metro_summary = {
+                "status": "All Systems Normal" if maintenance_count == 0 else f"{maintenance_count} Stations under Maintenance",
+                "ridership": total_ridership,
+                "lines": len(metro_data.get('lines', [])),
+                "stations": len(metro_data.get('stations', []))
+            }
+            metro_history = metro_data.get('history', [])
+
     fallback = load_fallback_data()
     latest_aqi = 50
     if environment and isinstance(environment, list) and len(environment) > 0 and "aqi" in environment[0]:
@@ -158,6 +196,8 @@ async def get_all_metrics():
         "kpis": kpis,
         "environment": environment[::-1] if isinstance(environment, list) else [],
         "traffic": traffic[::-1] if isinstance(traffic, list) else [],
+        "metro": metro_summary,
+        "metroHistory": metro_history,
         "energy": fallback.get("energy", []),
         "transport": fallback.get("transport", []),
         "water": fallback.get("water", [])
@@ -167,11 +207,56 @@ async def get_all_metrics():
 async def get_route(req: RouteRequest):
     G = build_traffic_graph(req.mode)
     if not G: raise HTTPException(status_code=404, detail="Traffic data not available")
+    
     try:
         start_node = find_nearest_node(G, req.start)
         end_node = find_nearest_node(G, req.end)
-        path = nx.shortest_path(G, source=start_node, target=end_node, weight='weight')
-        return {"path": path, "mode": req.mode, "distance_idx": len(path)}
+        
+        if not start_node or not end_node:
+            raise HTTPException(status_code=404, detail="Nearest graph nodes not found")
+        
+        # 1. Calculate Optimal Path
+        path_opt = nx.shortest_path(G, source=start_node, target=end_node, weight='weight')
+        
+        # 2. Calculate Distance and Time for Optimal
+        dist_km = 0
+        for i in range(len(path_opt) - 1):
+            p1, p2 = path_opt[i], path_opt[i+1]
+            deg_dist = ((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)**0.5
+            dist_km += deg_dist * 111.0
+        
+        avg_speed = 35 if req.mode in ['car', 'bus'] else 15 if req.mode in ['bike', 'cycle'] else 5
+        time_min = (dist_km / avg_speed) * 60 * 1.2 # Adjust for city factor
+        
+        # 3. Alternative Path (Simple approach: increase weights of optimal edges and re-calculate)
+        G_alt = G.copy()
+        for i in range(len(path_opt) - 1):
+            u, v = path_opt[i], path_opt[i+1]
+            if G_alt.has_edge(u, v):
+                G_alt[u][v]['weight'] *= 2.0
+        
+        path_alt = nx.shortest_path(G_alt, source=start_node, target=end_node, weight='weight')
+        
+        dist_alt = 0
+        for i in range(len(path_alt) - 1):
+            p1, p2 = path_alt[i], path_alt[i+1]
+            dist_alt += (((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)**0.5) * 111.0
+        
+        time_alt = (dist_alt / avg_speed) * 60 * 1.3
+        
+        return {
+            "optimal": {
+                "path": path_opt,
+                "distance": f"{dist_km:.2f} km",
+                "time": f"{int(time_min)} min"
+            },
+            "alternative": {
+                "path": path_alt,
+                "distance": f"{dist_alt:.2f} km",
+                "time": f"{int(time_alt)} min"
+            },
+            "mode": req.mode
+        }
     except nx.NetworkXNoPath: raise HTTPException(status_code=404, detail="No path found")
     except Exception as e: raise HTTPException(status_code=500, detail=str(e))
 

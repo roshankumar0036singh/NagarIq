@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import DeckGL from '@deck.gl/react';
 import { ScatterplotLayer, PathLayer } from '@deck.gl/layers';
 import { TripsLayer } from '@deck.gl/geo-layers';
+import { PathStyleExtension } from '@deck.gl/extensions';
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import { Map } from 'react-map-gl/maplibre';
 import { LightingEffect, AmbientLight, PointLight } from '@deck.gl/core';
@@ -25,15 +26,22 @@ const lightingEffect = new LightingEffect({ ambientLight });
 const DeckGLMap = () => {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [trafficData, setTrafficData] = useState(null);
+  const [busData, setBusData] = useState(null);
+  const [metroData, setMetroData] = useState(null);
+  const [showMetro, setShowMetro] = useState(true);
+  const [selectedStop, setSelectedStop] = useState(null);
   const [hoverInfo, setHoverInfo] = useState(null);
   const [time, setTime] = useState(0);
 
   // New Routing & Mode State
-  const [selectedMode, setSelectedMode] = useState('car'); // car, bike, cycle, pedestrian
+  // New Routing & Mode State
+  const [selectedMode, setSelectedMode] = useState('car'); // car, bike, cycle, pedestrian, bus
   const [routingState, setRoutingState] = useState(null); // 'picking-start', 'picking-end', 'calculating', 'resolved'
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
   const [optimalPath, setOptimalPath] = useState(null);
+  const [alternativePath, setAlternativePath] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
 
   // Animation Loop for TripsLayer
   useEffect(() => {
@@ -51,6 +59,16 @@ const DeckGLMap = () => {
       .then(res => res.json())
       .then(data => setTrafficData(data))
       .catch(err => console.error("Error loading traffic data:", err));
+
+    fetch('/data/metro_data.json')
+      .then(res => res.json())
+      .then(data => setMetroData(data))
+      .catch(err => console.error("Error loading metro data:", err));
+
+    fetch('/data/bus_data.json')
+      .then(res => res.json())
+      .then(data => setBusData(data))
+      .catch(err => console.error("Error loading bus data:", err));
   }, []);
 
   // Filtered segments based on selected mode
@@ -89,8 +107,15 @@ const DeckGLMap = () => {
         body: JSON.stringify({ start, end, mode: selectedMode })
       });
       const data = await response.json();
-      if (data.path) {
-        setOptimalPath(data.path);
+      if (data.optimal) {
+        setOptimalPath(data.optimal.path);
+        setAlternativePath(data.alternative.path);
+        setRouteInfo({
+          optTime: data.optimal.time,
+          altTime: data.alternative.time,
+          optDist: data.optimal.distance,
+          altDist: data.alternative.distance
+        });
         setRoutingState('resolved');
       } else {
         alert("No path found!");
@@ -103,6 +128,17 @@ const DeckGLMap = () => {
   };
 
   const onMapClick = (info) => {
+    // If we clicked on a bus stop, select it and show the arrival feed
+    if (selectedMode === 'bus' && info.object && info.layer && info.layer.id === 'bus-stops') {
+       setSelectedStop(info.object);
+       return;
+    }
+
+    // Deselect stop if clicked on empty map space
+    if (selectedMode === 'bus' && !info.object) {
+       setSelectedStop(null);
+    }
+
     if (routingState === 'picking-start') {
       setStartPoint(info.coordinate);
       setRoutingState('picking-end');
@@ -144,7 +180,8 @@ const DeckGLMap = () => {
     }),
 
     // 3. Elegant Arteries (Variable Glow)
-    new PathLayer({
+    // Show this layer for 'car' mode, or if a 'bus' stop is currently selected to show context
+    (selectedMode === 'car' || (selectedMode === 'bus' && selectedStop)) && new PathLayer({
       id: 'traffic-paths-glow',
       data: filteredFeatures,
       getPath: d => d.geometry.coordinates.map(p => [p[0], p[1]]),
@@ -174,6 +211,19 @@ const DeckGLMap = () => {
         blendFunc: [770, 1], // Add Glow
         blendEquation: 32774
       }
+    }),
+
+    // 4b. Alternative Route Layer (Dotted)
+    alternativePath && new PathLayer({
+      id: 'alternative-route',
+      data: [{ path: alternativePath }],
+      getPath: d => d.path,
+      getColor: [255, 255, 255, 120], // Translucent white
+      getWidth: 4,
+      widthMinPixels: 3,
+      getDashArray: [6, 4], // Dotted/Dashed
+      dashJustified: true,
+      extensions: [new PathStyleExtension({ dash: true })]
     }),
 
     // 5. Start/End Markers
@@ -213,6 +263,105 @@ const DeckGLMap = () => {
       trailLength: 200,
       currentTime: time,
       shadowEnabled: false
+    }),
+
+    // 7. Metro Lines Glow (Atmospheric)
+    showMetro && metroData && new PathLayer({
+      id: 'metro-lines-glow',
+      data: metroData.lines,
+      getPath: d => d.path,
+      getColor: d => [...d.color, 100],
+      getWidth: 24,
+      widthMinPixels: 12,
+      opacity: 0.3,
+      parameters: {
+        blendFunc: [770, 1],
+        blendEquation: 32774
+      }
+    }),
+
+    // 8. Metro Lines Core (Solid)
+    showMetro && metroData && new PathLayer({
+      id: 'metro-lines-core',
+      data: metroData.lines,
+      getPath: d => d.path,
+      getColor: d => [255, 255, 255],
+      getWidth: 4,
+      widthMinPixels: 2,
+      opacity: 1,
+    }),
+
+    // 9. Metric Threads (Moving Trains)
+    showMetro && metroData && new TripsLayer({
+      id: 'metro-trips',
+      data: metroData.trains,
+      getPath: d => d.path,
+      getTimestamps: d => d.timestamps,
+      getColor: d => d.color,
+      opacity: 1,
+      widthMinPixels: 8,
+      trailLength: 150,
+      currentTime: time,
+      shadowEnabled: false
+    }),
+
+    // 10. Metro Stations Layer
+    showMetro && metroData && new ScatterplotLayer({
+      id: 'metro-stations',
+      data: metroData.stations,
+      getPosition: d => d.coords,
+      getFillColor: d => d.status === 'Operational' ? [255, 255, 255] : [239, 68, 68],
+      getRadius: d => 35 + (d.occupancy * 0.4),
+      radiusMinPixels: 4,
+      stroked: true,
+      getLineColor: d => d.line === 'Orange' ? [255, 120, 0] : d.line === 'Aqua' ? [0, 180, 255] : [255, 255, 255],
+      lineWidthMinPixels: 2,
+      pickable: true,
+      onHover: info => setHoverInfo(info)
+    }),
+
+    // 11. Bus Routes Layer (De-emphasized)
+    (selectedMode === 'bus' || selectedMode === 'car') && busData && new PathLayer({
+      id: 'bus-routes',
+      data: busData.routes || [],
+      getPath: d => d.path || [], // handle missing path gracefully
+      getColor: d => d.color || [100, 100, 100],
+      getWidth: 2,
+      widthMinPixels: 1,
+      opacity: 0.2, // Subtle
+      pickable: false
+    }),
+
+    // 12. Live Bus Positions (De-emphasized smaller markers)
+    (selectedMode === 'bus' || selectedMode === 'car') && busData && new ScatterplotLayer({
+      id: 'bus-positions',
+      data: busData.buses,
+      getPosition: d => d.position,
+      getFillColor: [59, 130, 246], // Blue color for live buses
+      getRadius: 15,
+      radiusMinPixels: 4,
+      stroked: false,
+      pickable: true,
+      onHover: info => setHoverInfo(info)
+    }),
+
+    // 13. Bus Stops Layer (Glowing Orbs)
+    selectedMode === 'bus' && busData && new ScatterplotLayer({
+      id: 'bus-stops',
+      data: busData.stops,
+      getPosition: d => d.coords,
+      getFillColor: d => selectedStop && selectedStop.id === d.id ? [245, 158, 11] : [16, 185, 129], // Gold if selected, else Emerald
+      getRadius: d => selectedStop && selectedStop.id === d.id ? 40 : 25,
+      radiusMinPixels: d => selectedStop && selectedStop.id === d.id ? 15 : 8,
+      stroked: true,
+      getLineColor: [255, 255, 255],
+      lineWidthMinPixels: 2,
+      pickable: true,
+      onHover: info => setHoverInfo(info),
+      parameters: {
+        blendFunc: [770, 1],
+        blendEquation: 32774
+      }
     })
   ];
 
@@ -254,7 +403,26 @@ const DeckGLMap = () => {
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.1)'
         }}>
-          {['car', 'bike', 'cycle', 'pedestrian'].map(mode => (
+          <button
+            onClick={() => setShowMetro(!showMetro)}
+            style={{
+              background: showMetro ? '#10B981' : 'rgba(255,255,255,0.05)',
+              color: showMetro ? 'black' : 'white',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '12px',
+              fontSize: '0.7rem',
+              fontFamily: "'Roboto Mono', monospace",
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              transition: 'all 0.2s',
+              marginRight: '0.5rem',
+              borderRight: '1px solid rgba(255,255,255,0.1)'
+            }}
+          >
+            METRO: {showMetro ? 'ON' : 'OFF'}
+          </button>
+          {['car', 'bike', 'cycle', 'pedestrian', 'bus'].map(mode => (
             <button
               key={mode}
               onClick={() => {
@@ -351,6 +519,79 @@ const DeckGLMap = () => {
             )}
           </div>
         )}
+
+        {/* Live Arrival Feed Panel */}
+        {selectedMode === 'bus' && selectedStop && busData && busData.arrivals && busData.arrivals[selectedStop.id] && (
+          <div style={{
+            background: 'rgba(2, 6, 23, 0.85)',
+            padding: '1.5rem',
+            borderRadius: '24px',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            backdropFilter: 'blur(24px)',
+            color: 'white',
+            fontFamily: "'Inter', 'Roboto Mono', sans-serif",
+            marginTop: '1rem',
+            minWidth: '300px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <div style={{ fontSize: '0.65rem', color: '#10B981', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Live Feed</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 600, marginTop: '0.2rem' }}>{selectedStop.name}</div>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setSelectedStop(null); }}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '1.2rem' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {busData.arrivals[selectedStop.id].length > 0 ? (
+                 busData.arrivals[selectedStop.id].map((arrival, idx) => (
+                   <div key={idx} style={{ 
+                     display: 'flex', 
+                     alignItems: 'center', 
+                     justifyContent: 'space-between',
+                     padding: '0.75rem',
+                     background: 'rgba(255,255,255,0.03)',
+                     borderRadius: '12px',
+                     border: '1px solid rgba(255,255,255,0.05)'
+                   }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ 
+                          background: '#3B82F6', 
+                          color: 'white', 
+                          fontWeight: 700, 
+                          padding: '0.3rem 0.5rem', 
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
+                          fontFamily: "'Roboto Mono', monospace"
+                        }}>
+                          {arrival.routeId}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>{arrival.routeName}</div>
+                          <div style={{ fontSize: '0.65rem', color: arrival.status === 'Delayed' ? '#EF4444' : '#10B981', marginTop: '0.1rem' }}>
+                            {arrival.status} • {arrival.time}
+                          </div>
+                        </div>
+                     </div>
+                     <div style={{ textAlign: 'right', fontFamily: "'Roboto Mono', monospace" }}>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 700, color: arrival.wait <= 5 ? '#F59E0B' : 'white' }}>
+                          {arrival.wait} <span style={{ fontSize: '0.6rem', fontWeight: 400, opacity: 0.6 }}>MIN</span>
+                        </div>
+                     </div>
+                   </div>
+                 ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '1rem', opacity: 0.5, fontSize: '0.8rem' }}>No upcoming arrivals</div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
       
       {/* HUD: City Telemetry (Minimal Corner Overlays) */}
@@ -433,19 +674,45 @@ const DeckGLMap = () => {
           fontFamily: "'Roboto Mono', monospace, SFMono-Regular, Consolas",
         }}>
           <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem', color: '#F59E0B' }}>
-            {hoverInfo.object.properties.name || 'ANONYMOUS_LINK'}
+            {hoverInfo.object.routeName || hoverInfo.object.name || hoverInfo.object.properties?.name || 'ANONYMOUS_LINK'}
           </div>
-          <div style={{ fontSize: '0.65rem', opacity: 0.4, marginBottom: '1rem' }}>SEGMENT_ID: {hoverInfo.object.properties.id.toString().slice(0, 12)}</div>
+          <div style={{ fontSize: '0.65rem', opacity: 0.4, marginBottom: '1rem' }}>
+            ID: {(hoverInfo.object.id || hoverInfo.object.properties?.id || '').toString().slice(0, 12)}
+          </div>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-             <span style={{ opacity: 0.5 }}>FLOW_RATE</span>
-             <span>{hoverInfo.object.properties.speed} km/h</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginTop: '0.5rem' }}>
-             <span style={{ opacity: 0.5 }}>DENSITY</span>
-             <span style={{ color: hoverInfo.object.properties.congestion > 0.7 ? '#EF4444' : '#10B981' }}>
-               {(hoverInfo.object.properties.congestion * 100).toFixed(1)}%
-             </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+               <span style={{ opacity: 0.5 }}>
+                 {hoverInfo.object.occupancy !== undefined ? 'OCCUPANCY' : 'FLOW_RATE'}
+               </span>
+               <span>
+                 {hoverInfo.object.occupancy !== undefined ? 
+                   (hoverInfo.object.routeName ? `${hoverInfo.object.occupancy} PAX` : `${hoverInfo.object.occupancy.toFixed(1)}%`) : 
+                   `${hoverInfo.object.properties?.speed || '---'} km/h`}
+               </span>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+               <span style={{ opacity: 0.5 }}>
+                 {hoverInfo.object.delay !== undefined ? 'SCHEDULE' : 'DENSITY'}
+               </span>
+               <span style={{ 
+                 color: (hoverInfo.object.delay > 5 || (hoverInfo.object.properties?.congestion > 0.7) || hoverInfo.object.status === 'Maintenance') ? '#EF4444' : '#10B981' 
+               }}>
+                 {hoverInfo.object.delay !== undefined ? 
+                   (hoverInfo.object.delay === 0 ? 'ON TIME' : `${hoverInfo.object.delay}m DELAY`) : 
+                   (hoverInfo.object.status || `${((hoverInfo.object.properties?.congestion || 0) * 100).toFixed(1)}%`)}
+               </span>
+            </div>
+
+            {(hoverInfo.object.speed || hoverInfo.object.line) && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                <span style={{ opacity: 0.5 }}>{hoverInfo.object.line ? 'LINE' : 'VELOCITY'}</span>
+                <span style={{ color: hoverInfo.object.line === 'Orange' ? '#FF7800' : hoverInfo.object.line === 'Aqua' ? '#00B4FF' : 'white' }}>
+                  {hoverInfo.object.line || `${hoverInfo.object.speed} km/h`}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       )}

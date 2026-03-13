@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { KPIBadge } from './AnimatedCard';
-import { TrafficChart, EnvironmentChart, EnergyChart } from './DataCharts';
-import { Activity, Radio, AlertTriangle, Zap, Car } from 'lucide-react';
+import { TrafficChart, EnvironmentChart, EnergyChart, MetroRidershipChart } from './DataCharts';
+import { Activity, Radio, AlertTriangle, Zap, Car, TrainTrack } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
@@ -113,12 +113,22 @@ const Dashboard = () => {
           colorVariant="orange"
           delay={0.4}
         />
+        <KPIBadge 
+          title="Metro Ridership" 
+          value={data.metro.ridership.toLocaleString()} 
+          icon={TrainTrack}
+          trend="up"
+          trendValue="8.2%"
+          colorVariant="blue"
+          delay={0.5}
+        />
       </div>
 
       {/* Charts Section */}
       <div className="dashboard-grid-large" style={{ marginTop: '2rem' }}>
         <TrafficChart data={data.traffic} />
         <EnvironmentChart data={data.environment} />
+        <MetroRidershipChart data={data.metroHistory} />
         <EnergyChart data={data.energy} />
         
         {/* Alerts / Summary Panel */}

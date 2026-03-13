@@ -95,3 +95,30 @@ export const EnergyChart = ({ data }) => {
     </AnimatedCard>
   );
 };
+
+export const MetroRidershipChart = ({ data }) => {
+  return (
+    <AnimatedCard delay={0.7} style={{ height: '350px', display: 'flex', flexDirection: 'column' }}>
+      <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem', fontWeight: 600 }}>Metro Ridership & Capacity</h3>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorRidership" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="hsl(var(--accent-blue))" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="hsl(var(--accent-purple))" stopOpacity={0.8}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+            <XAxis dataKey="time" stroke="hsl(var(--text-secondary))" tick={{fill: 'hsl(var(--text-secondary))', fontSize: 12}} axisLine={false} tickLine={false} />
+            <YAxis stroke="hsl(var(--text-secondary))" tick={{fill: 'hsl(var(--text-secondary))', fontSize: 12}} axisLine={false} tickLine={false} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend wrapperStyle={{ paddingTop: '10px' }} />
+            <Bar name="Ridership" dataKey="ridership" fill="url(#colorRidership)" radius={[4, 4, 0, 0]} />
+            <Line type="monotone" name="Capacity Limit" dataKey="capacity" stroke="hsl(var(--accent-red))" strokeDasharray="5 5" dot={false} strokeWidth={2} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </AnimatedCard>
+  );
+};
