@@ -32,7 +32,7 @@ def main():
             # Check if there are changes (just in case, though heartbeat always changes)
             status = run_command("git status --porcelain")
             if status:
-                run_command(f'git commit -m "Heartbeat: {timestamp} [skip ci]"')
+                run_command(f'git commit -m "Heartbeat: {timestamp}"')
                 # Pull changes from remote to avoid "fetch first" errors
                 run_command("git pull --rebase origin main")
                 run_command("git push origin main")
