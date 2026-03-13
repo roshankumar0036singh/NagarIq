@@ -375,7 +375,7 @@ async def get_si_insights():
         try:
             # Use 'github-actions' to be more flexible (matches bot and prefix)
             result = subprocess.run(
-                ["git", "log", "--author=github-actions", "--pretty=format:%H", "-n", "2"],
+                ["git", "log", "--pretty=format:%H", "-n", "2"],
                 capture_output=True, text=True, check=True, cwd=os.path.join(os.path.dirname(__file__), "..")
             )
             commits = [c.strip() for c in result.stdout.split("\n") if c.strip()]
