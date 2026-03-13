@@ -143,7 +143,14 @@ const SIInsightLayer = () => {
                   <h3 style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '0.02em' }}>Current City Pulse Report</h3>
                 </div>
                 
-                <div className="prose si-report-content" style={{ fontSize: '1.1rem', lineHeight: '1.7' }}>
+                <div className="prose si-report-content" style={{ 
+                  fontSize: '1.1rem', 
+                  lineHeight: '1.7',
+                  overflowWrap: 'break-word',
+                  wordWrap: 'break-word',
+                  maxWidth: '100%',
+                  color: 'rgba(255,255,255,0.9)'
+                }}>
                   <ReactMarkdown>{data.report}</ReactMarkdown>
                 </div>
 
