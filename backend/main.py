@@ -44,6 +44,10 @@ class EmergencyRouteRequest(BaseModel):
 class AIQueryRequest(BaseModel):
     query: str
 
+class MultiModalRouteRequest(BaseModel):
+    start: Tuple[float, float]
+    end: Tuple[float, float]
+
 def load_fallback_data():
     """Loads static fallback data if external APIs fail or keys are missing."""
     if not os.path.exists(DATA_FILE):
@@ -384,6 +388,90 @@ Recent Traffic Data (Congestion, Speed):
                 raise HTTPException(status_code=response.status_code, detail=f"Mistral API error: {response.text}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to communicate with Mistral AI: {str(e)}")
+
+@app.post("/api/multi-modal-route")
+async def get_multi_modal_route(req: MultiModalRouteRequest):
+    if not os.path.exists(METRO_DATA_PATH):
+        raise HTTPException(status_code=404, detail="Metro data not available")
+    
+    with open(METRO_DATA_PATH, "r") as f:
+        metro_data = json.load(f)
+    
+    stations = metro_data.get('stations', [])
+    if not stations:
+        raise HTTPException(status_code=404, detail="No metro stations found")
+
+    # 1. Find Nearest Stations
+    entry_station = min(stations, key=lambda s: (s['coords'][0]-req.start[0])**2 + (s['coords'][1]-req.start[1])**2)
+    exit_station = min(stations, key=lambda s: (s['coords'][0]-req.end[0])**2 + (s['coords'][1]-req.end[1])**2)
+
+    # 2. Road Graphs
+    G_car = build_traffic_graph('car')
+    G_walk = build_traffic_graph('pedestrian')
+    
+    if not G_car or not G_walk:
+        raise HTTPException(status_code=500, detail="Traffic graphs could not be built")
+
+    try:
+        # Segment 1: Start -> Entry Station (Car)
+        start_node = find_nearest_node(G_car, req.start)
+        entry_node = find_nearest_node(G_car, entry_station['coords'])
+        path1 = nx.shortest_path(G_car, source=start_node, target=entry_node, weight='weight')
+        dist1_km = sum((((path1[i][0]-path1[i+1][0])**2 + (path1[i][1]-path1[i+1][1])**2)**0.5) for i in range(len(path1)-1)) * 111.0
+        time1_min = (dist1_km / 35.0) * 60 * 1.2
+
+        # Segment 2: Entry Station -> Exit Station (Metro)
+        path2 = [entry_station['coords'], exit_station['coords']]
+        dist2_km = (((entry_station['coords'][0]-exit_station['coords'][0])**2 + (entry_station['coords'][1]-exit_station['coords'][1])**2)**0.5) * 111.0
+        time2_min = (dist2_km / 40.0) * 60 + 5 
+
+        # Segment 3: Exit Station -> End (Walk)
+        exit_node_walk = find_nearest_node(G_walk, exit_station['coords'])
+        end_node_walk = find_nearest_node(G_walk, req.end)
+        path3 = nx.shortest_path(G_walk, source=exit_node_walk, target=end_node_walk, weight='weight')
+        dist3_km = sum((((path3[i][0]-path3[i+1][0])**2 + (path3[i][1]-path3[i+1][1])**2)**0.5) for i in range(len(path3)-1)) * 111.0
+        time3_min = (dist3_km / 5.0) * 60
+
+        # 3. Pure Driving Route for Comparison
+        drive_start = find_nearest_node(G_car, req.start)
+        drive_end = find_nearest_node(G_car, req.end)
+        path_drive = nx.shortest_path(G_car, source=drive_start, target=drive_end, weight='weight')
+        dist_drive_km = sum((((path_drive[i][0]-path_drive[i+1][0])**2 + (path_drive[i][1]-path_drive[i+1][1])**2)**0.5) for i in range(len(path_drive)-1)) * 111.0
+        time_drive_min = (dist_drive_km / 30.0) * 60 * 1.3
+
+        co2_multi = (dist1_km * 170) + (dist2_km * 20)
+        co2_drive = (dist_drive_km * 170)
+        
+        cost_multi = (dist1_km * 10) + (dist2_km * 2) + 10 
+        cost_drive = (dist_drive_km * 10)
+
+        return {
+            "multiModal": {
+                "segments": [
+                    {"mode": "car", "path": path1, "distance": f"{dist1_km:.2f} km", "time": f"{int(time1_min)} min"},
+                    {"mode": "metro", "path": path2, "distance": f"{dist2_km:.2f} km", "time": f"{int(time2_min)} min", "station": entry_station['name']},
+                    {"mode": "walk", "path": path3, "distance": f"{dist3_km:.2f} km", "time": f"{int(time3_min)} min"}
+                ],
+                "totalTime": f"{int(time1_min + time2_min + time3_min)} min",
+                "totalDistance": f"{dist1_km + dist2_km + dist3_km:.2f} km",
+                "co2": f"{co2_multi/1000:.2f} kg",
+                "cost": f"₹{int(cost_multi)}"
+            },
+            "drivingComparison": {
+                "path": path_drive,
+                "totalTime": f"{int(time_drive_min)} min",
+                "totalDistance": f"{dist_drive_km:.2f} km",
+                "co2": f"{co2_drive/1000:.2f} kg",
+                "cost": f"₹{int(cost_drive)}"
+            },
+            "savings": {
+                "co2": f"{(co2_drive - co2_multi)/1000:.2f} kg",
+                "cost": f"₹{int(cost_drive - cost_multi)}",
+                "time": f"{int(time_drive_min - (time1_min + time2_min + time3_min))} min"
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

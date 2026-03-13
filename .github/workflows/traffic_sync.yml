@@ -2,9 +2,7 @@ name: NagarIQ Data Sync
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # Run every 5 minutes
-  push:
-    branches: [ main ]
+    - cron: '*/7 * * * *' # Run every 7 minutes
   workflow_dispatch: # Allow manual trigger
 
 permissions:
