@@ -366,12 +366,15 @@ async def get_si_insights():
 
     def get_last_sync_commits():
         try:
+            # Use 'github-actions' to be more flexible (matches bot and prefix)
             result = subprocess.run(
-                ["git", "log", "--author=github-actions[bot]", "--pretty=format:%H", "-n", "2"],
+                ["git", "log", "--author=github-actions", "--pretty=format:%H", "-n", "2"],
                 capture_output=True, text=True, check=True, cwd=os.path.join(os.path.dirname(__file__), "..")
             )
-            return result.stdout.split("\n")
-        except Exception:
+            commits = [c.strip() for c in result.stdout.split("\n") if c.strip()]
+            return commits
+        except Exception as e:
+            print(f"Git log error: {e}")
             return []
 
     commits = get_last_sync_commits()
