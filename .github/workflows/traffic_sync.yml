@@ -52,4 +52,4 @@ jobs:
           git add frontend/public/data/live_traffic.json
           git add frontend/public/data/bus_data.json
           git add frontend/public/data/metro_data.json
-          git diff --cached --quiet && echo "No changes to commit" || (git commit -m "Auto-sync all city data [skip ci]" && git push)
+          git diff --cached --quiet && echo "No changes to commit" || (git commit -m "Auto-sync all city data [skip ci]" && git pull --rebase origin main && git push origin main)
