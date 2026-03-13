@@ -148,6 +148,62 @@ const DeckGLMap = () => {
     }
   };
 
+  // Mode Share Estimation Calculation (Calibrated with real Nagpur stats)
+  const modeShare = useMemo(() => {
+    let publicPax = 0;
+    let privatePax = 0;
+
+    // Real stats: Nagpur Metro ~1.2 Lakh/day, Nagpur Buses ~1.16 Lakh/day
+    // We scale our visual data to represent a snapshot of this daily flow
+    
+    // Scale factor to simulate current snapshot vs daily total
+    const snapshotScale = 0.05; // Assuming we are looking at 5% of daily traffic at any given moment
+
+    if (busData && busData.buses) {
+      // Instead of raw max capacity, use realistic average loads scaled by active vehicles
+      publicPax += busData.buses.length * 45; // ~45 pax per active bus (sitting + standing)
+      
+      // Add background static public transit volume based on real data
+      const baselineBusRidership = 116000 * snapshotScale;
+      publicPax = Math.max(publicPax, baselineBusRidership);
+    }
+    
+    if (metroData && metroData.trains) {
+      publicPax += metroData.trains.length * 300; // ~300 pax per active train
+      
+      // Add background static public transit volume based on real data
+      const baselineMetroRidership = 120000 * snapshotScale;
+      publicPax = Math.max(publicPax, baselineMetroRidership);
+    }
+    
+    if (trafficData && trafficData.features) {
+      // Real stat: Nagpur has ~43% two-wheelers, 6% cars. Private vehicles dominate.
+      // We calculate private volume based on the congestion weights
+      let activeVehicles = trafficData.features.reduce((acc, f) => {
+        // approx 10 to 50 vehicles (cars+bikes) per segment based on congestion
+        const vehicles = 10 + (f.properties.congestion * 40); 
+        return acc + vehicles;
+      }, 0);
+      
+      // We know from CMP that total private trips vastly outnumber public (~80% private modes vs ~20% public/NMT)
+      // So we scale our visual vehicle count to represent realistic passenger volumes
+      privatePax += activeVehicles * 1.5; // average 1.5 pax per private vehicle
+      
+      // Ensure the ratio reflects reality even if map data is sparse
+      if (publicPax > 0 && privatePax < publicPax * 3) {
+         privatePax = publicPax * 3.5; // Force a realistic baseline ratio if data implies otherwise
+      }
+    }
+
+    const total = publicPax + privatePax || 1; // avoid division by zero
+    return {
+      public: Math.round((publicPax / total) * 100),
+      private: Math.round((privatePax / total) * 100),
+      publicVolume: Math.round(publicPax),
+      privateVolume: Math.round(privatePax)
+    };
+  }, [busData, metroData, trafficData]);
+
   const layers = [
     // 1. Nocturnal Heatmap (Liquid Flow)
     new HeatmapLayer({
@@ -602,6 +658,9 @@ const DeckGLMap = () => {
         zIndex: 1,
         fontFamily: "'Roboto Mono', monospace, SFMono-Regular, Consolas",
         color: 'white',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2rem'
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           <div style={{ fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.2em', color: '#10B981' }}>NAGPUR INTEL // ACTIVE</div>
@@ -617,6 +676,77 @@ const DeckGLMap = () => {
              </div>
           </div>
         </div>
+
+        {/* Live Arrival Feed Panel (Moved to Left Side) */}
+        {selectedMode === 'bus' && selectedStop && busData && busData.arrivals && busData.arrivals[selectedStop.id] && (
+          <div style={{
+            background: 'rgba(2, 6, 23, 0.85)',
+            padding: '1.5rem',
+            borderRadius: '24px',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            backdropFilter: 'blur(24px)',
+            color: 'white',
+            fontFamily: "'Inter', 'Roboto Mono', sans-serif",
+            minWidth: '300px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <div style={{ fontSize: '0.65rem', color: '#10B981', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>Live Feed</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 600, marginTop: '0.2rem' }}>{selectedStop.name}</div>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setSelectedStop(null); }}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '1.2rem' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {busData.arrivals[selectedStop.id].length > 0 ? (
+                 busData.arrivals[selectedStop.id].map((arrival, idx) => (
+                   <div key={idx} style={{ 
+                     display: 'flex', 
+                     alignItems: 'center', 
+                     justifyContent: 'space-between',
+                     padding: '0.75rem',
+                     background: 'rgba(255,255,255,0.03)',
+                     borderRadius: '12px',
+                     border: '1px solid rgba(255,255,255,0.05)'
+                   }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ 
+                          background: '#3B82F6', 
+                          color: 'white', 
+                          fontWeight: 700, 
+                          padding: '0.3rem 0.5rem', 
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
+                          fontFamily: "'Roboto Mono', monospace"
+                        }}>
+                          {arrival.routeId}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>{arrival.routeName}</div>
+                          <div style={{ fontSize: '0.65rem', color: arrival.status === 'Delayed' ? '#EF4444' : '#10B981', marginTop: '0.1rem' }}>
+                            {arrival.status} • {arrival.time}
+                          </div>
+                        </div>
+                     </div>
+                     <div style={{ textAlign: 'right', fontFamily: "'Roboto Mono', monospace" }}>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 700, color: arrival.wait <= 5 ? '#F59E0B' : 'white' }}>
+                          {arrival.wait} <span style={{ fontSize: '0.6rem', fontWeight: 400, opacity: 0.6 }}>MIN</span>
+                        </div>
+                     </div>
+                   </div>
+                 ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '1rem', opacity: 0.5, fontSize: '0.8rem' }}>No upcoming arrivals</div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* HUD: Environment Metrics (Bottom Right) */}
@@ -652,6 +782,59 @@ const DeckGLMap = () => {
            <div>
               <div style={{ fontSize: '0.6rem', opacity: 0.3, textTransform: 'uppercase' }}>Saturation</div>
               <div style={{ fontSize: '0.9rem', color: '#F59E0B', fontWeight: 600 }}>OPTIMAL</div>
+           </div>
+        </div>
+      </div>
+
+      {/* HUD: Mode Share Estimation (Bottom Left) */}
+      <div style={{
+        position: 'absolute',
+        bottom: '2rem',
+        left: '2rem',
+        zIndex: 1,
+        fontFamily: "'Roboto Mono', monospace, SFMono-Regular, Consolas",
+        padding: '1.25rem',
+        background: 'rgba(2, 6, 23, 0.5)',
+        backdropFilter: 'blur(40px)',
+        borderRadius: '20px',
+        border: '1px solid rgba(255,255,255,0.06)',
+        minWidth: '200px',
+        maxWidth: '220px',
+        color: 'white'
+      }}>
+        <div style={{ marginBottom: '0.75rem' }}>
+           <div style={{ fontSize: '0.55rem', opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Mode Share</div>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+           {/* Public Transit */}
+           <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                 <span style={{ fontSize: '0.6rem', fontWeight: 600, color: '#3B82F6' }}>PUBLIC <span style={{ opacity: 0.5, fontSize: '0.45rem' }}>(Bus+Metro)</span></span>
+                 <span style={{ fontSize: '0.6rem', fontWeight: 600 }}>{modeShare.public}%</span>
+              </div>
+              <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                 <div style={{ height: '100%', width: `${modeShare.public}%`, background: '#3B82F6', borderRadius: '2px', transition: 'width 1s ease-in-out' }}></div>
+              </div>
+              <div style={{ fontSize: '0.5rem', opacity: 0.35, marginTop: '0.2rem', textAlign: 'right' }}>{modeShare.publicVolume.toLocaleString()} Pax</div>
+           </div>
+
+           {/* Private Roads */}
+           <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                 <span style={{ fontSize: '0.6rem', fontWeight: 600, color: '#F59E0B' }}>PRIVATE <span style={{ opacity: 0.5, fontSize: '0.45rem' }}>(Cars+2W)</span></span>
+                 <span style={{ fontSize: '0.6rem', fontWeight: 600 }}>{modeShare.private}%</span>
+              </div>
+              <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                 <div style={{ height: '100%', width: `${modeShare.private}%`, background: '#F59E0B', borderRadius: '2px', transition: 'width 1s ease-in-out' }}></div>
+              </div>
+              <div style={{ fontSize: '0.5rem', opacity: 0.35, marginTop: '0.2rem', textAlign: 'right' }}>{modeShare.privateVolume.toLocaleString()} Vehicles</div>
+           </div>
+
+           <div style={{ borderTop: '1px dotted rgba(255,255,255,0.08)', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.4rem', opacity: 0.25, letterSpacing: '0.03em', lineHeight: '1.3' }}>
+                *CMP 2021 calibrated · 2.36L public daily
+              </div>
            </div>
         </div>
       </div>

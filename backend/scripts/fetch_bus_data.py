@@ -15,7 +15,17 @@ BUS_STOPS = [
     {"id": "stop-007", "name": "Kamptee Road", "coords": [79.2000, 21.2200]},
     {"id": "stop-008", "name": "Wadi Naka", "coords": [78.9500, 21.1600]},
     {"id": "stop-009", "name": "Dharampeth", "coords": [79.0650, 21.1400]},
-    {"id": "stop-010", "name": "Medical Square", "coords": [79.0950, 21.1250]}
+    {"id": "stop-010", "name": "Medical Square", "coords": [79.0950, 21.1250]},
+    {"id": "stop-011", "name": "Manish Nagar", "coords": [79.1000, 21.1000]},
+    {"id": "stop-012", "name": "Sadar Bazaar", "coords": [79.0800, 21.1650]},
+    {"id": "stop-013", "name": "Itwari", "coords": [79.1100, 21.1550]},
+    {"id": "stop-014", "name": "Mahal", "coords": [79.1200, 21.1450]},
+    {"id": "stop-015", "name": "Nandanvan", "coords": [79.1300, 21.1200]},
+    {"id": "stop-016", "name": "Pratap Nagar", "coords": [79.0500, 21.1250]},
+    {"id": "stop-017", "name": "Trimurti Nagar", "coords": [79.0400, 21.1150]},
+    {"id": "stop-018", "name": "Gittikhadan", "coords": [79.0600, 21.1750]},
+    {"id": "stop-019", "name": "Mankapur", "coords": [79.0700, 21.1900]},
+    {"id": "stop-020", "name": "Kalamna Market", "coords": [79.1600, 21.1700]}
 ]
 
 # Nagpur Bus Routes
@@ -23,17 +33,27 @@ BUS_ROUTES = [
     {
         "id": "101",
         "name": "Pardi - Hingna",
-        "stops": ["stop-002", "stop-001", "stop-009", "stop-003"]
+        "stops": ["stop-002", "stop-013", "stop-014", "stop-001", "stop-009", "stop-016", "stop-003"]
     },
     {
         "id": "202",
         "name": "Koradi - Airport",
-        "stops": ["stop-004", "stop-005", "stop-001", "stop-006"]
+        "stops": ["stop-004", "stop-005", "stop-019", "stop-012", "stop-001", "stop-010", "stop-011", "stop-006"]
     },
     {
         "id": "303",
         "name": "Kamptee - Wadi",
-        "stops": ["stop-007", "stop-005", "stop-001", "stop-008"]
+        "stops": ["stop-007", "stop-020", "stop-002", "stop-013", "stop-001", "stop-009", "stop-008"]
+    },
+    {
+        "id": "404",
+        "name": "Nandanvan - Trimurti Nagar",
+        "stops": ["stop-015", "stop-010", "stop-001", "stop-016", "stop-017"]
+    },
+    {
+        "id": "505",
+        "name": "Gittikhadan - Medical",
+        "stops": ["stop-018", "stop-012", "stop-001", "stop-014", "stop-010"]
     }
 ]
 
