@@ -50,12 +50,12 @@ function App() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'hsl(var(--bg-primary))' }}>
       {/* Sidebar */}
-      <motion.aside 
+      <motion.aside
         initial={{ x: -280 }}
         animate={{ x: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-        style={{ 
-          width: '260px', 
+        style={{
+          width: '260px',
           borderRight: '1px solid var(--glass-border)',
           background: 'rgba(0,0,0,0.4)',
           backdropFilter: 'blur(10px)',
@@ -68,7 +68,7 @@ function App() {
         <div style={{ marginBottom: '3rem' }}>
           <h1 className="text-gradient" style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Activity color="hsl(var(--accent-blue))" size={28} />
-            Nexus City
+            Nagar Iq
           </h1>
           <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Smart Urban Analyzer
@@ -77,7 +77,7 @@ function App() {
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
           {navItems.map((item) => (
-            <div 
+            <div
               key={item.id}
               className={`sidebar-link ${activeTab === item.id ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
