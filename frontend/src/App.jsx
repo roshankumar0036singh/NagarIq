@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Dashboard from './components/Dashboard';
 import DeckGLMap from './components/map/DeckGLMap';
-import { LayoutDashboard, Settings, Map, Activity, Zap, Droplets } from 'lucide-react';
+import GrievanceMap from './components/map/GrievanceMap';
+import { LayoutDashboard, Settings, Map, Activity, Zap, Droplets, AlertCircle } from 'lucide-react';
 import './index.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
     { id: 'environment', label: 'Air Quality', icon: Activity },
     { id: 'energy', label: 'Energy Grid', icon: Zap },
     { id: 'water', label: 'Water Systems', icon: Droplets },
+    { id: 'grievances', label: 'Grievances', icon: AlertCircle },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -23,6 +25,8 @@ function App() {
         return <Dashboard />;
       case 'traffic':
         return <DeckGLMap />;
+      case 'grievances':
+        return <GrievanceMap />;
       default:
         return (
           <div className="glass-panel flex-center" style={{ minHeight: '60vh' }}>

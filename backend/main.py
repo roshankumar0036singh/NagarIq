@@ -25,15 +25,24 @@ app.add_middleware(
 CPCB_API_KEY = os.getenv("CPCB_API_KEY", "")
 TOMTOM_API_KEY = os.getenv("TOMTOM_API_KEY", "")
 OWM_API_KEY = os.getenv("OWM_API_KEY", "")
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "data", "city_data.json")
 TRAFFIC_DATA_PATH = os.path.join(os.path.dirname(__file__), "../frontend/public/data/live_traffic.json")
 METRO_DATA_PATH = os.path.join(os.path.dirname(__file__), "../frontend/public/data/metro_data.json")
+EMERGENCY_DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "emergency_resources.json")
 
 class RouteRequest(BaseModel):
     start: Tuple[float, float] # [lon, lat]
     end: Tuple[float, float]
     mode: str # 'car', 'bike', 'cycle', 'pedestrian'
+
+class EmergencyRouteRequest(BaseModel):
+    incident: Tuple[float, float] # [lon, lat]
+    type: str # 'medical', 'fire', 'all'
+
+class AIQueryRequest(BaseModel):
+    query: str
 
 def load_fallback_data():
     """Loads static fallback data if external APIs fail or keys are missing."""
@@ -203,6 +212,14 @@ async def get_all_metrics():
         "water": fallback.get("water", [])
     }
 
+@app.get("/api/grievances")
+async def get_grievances():
+    grievances_path = os.path.join(os.path.dirname(__file__), "data", "grievances.json")
+    if not os.path.exists(grievances_path):
+        raise HTTPException(status_code=404, detail="Grievances data not available")
+    with open(grievances_path, "r") as f:
+        return json.load(f)
+
 @app.post("/api/route")
 async def get_route(req: RouteRequest):
     G = build_traffic_graph(req.mode)
@@ -259,6 +276,114 @@ async def get_route(req: RouteRequest):
         }
     except nx.NetworkXNoPath: raise HTTPException(status_code=404, detail="No path found")
     except Exception as e: raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/emergency-route")
+async def get_emergency_route(req: EmergencyRouteRequest):
+    if not os.path.exists(EMERGENCY_DATA_PATH):
+        raise HTTPException(status_code=404, detail="Emergency resources data not found")
+    
+    with open(EMERGENCY_DATA_PATH, "r") as f:
+        resources = json.load(f)["resources"]
+    
+    # Filter by type if needed
+    if req.type == 'medical':
+        targets = [r for r in resources if r['type'] == 'hospital']
+    elif req.type == 'fire':
+        targets = [r for r in resources if r['type'] == 'fire_station']
+    else:
+        targets = resources
+
+    if not targets:
+        raise HTTPException(status_code=404, detail="No resources of this type available")
+
+    # 1. Find the Nearest Resource (Euclidean for simplicity first)
+    nearest = min(targets, key=lambda t: (t['position'][0]-req.incident[0])**2 + (t['position'][1]-req.incident[1])**2)
+    
+    # 2. Build Graph (Emergency vehicles use 'car' roads but ignore congestion penalties)
+    # We want the FASTEST path, so we use distance as base and IGNORE live congestion
+    # because they have right of way
+    G = build_traffic_graph('car') 
+    if not G: raise HTTPException(status_code=404, detail="Traffic data not available")
+
+    try:
+        start_node = find_nearest_node(G, nearest['position'])
+        end_node = find_nearest_node(G, req.incident)
+        
+        if not start_node or not end_node:
+            raise HTTPException(status_code=404, detail="Nearest graph nodes not found")
+        
+        # Emergency path uses weight='weight_emergency' or just dist
+        # Let's add weight_emergency which ignores congestion but keeps distance
+        for u, v, data in G.edges(data=True):
+            data['emergency_weight'] = ((u[0]-v[0])**2 + (u[1]-v[1])**2)**0.5
+
+        path = nx.shortest_path(G, source=start_node, target=end_node, weight='emergency_weight')
+        
+        dist_km = 0
+        for i in range(len(path) - 1):
+            p1, p2 = path[i], path[i+1]
+            dist_km += (((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)**0.5) * 111.0
+        
+        # High speed for emergency vehicles
+        avg_speed = 50 
+        time_min = (dist_km / avg_speed) * 60
+
+        return {
+            "path": path,
+            "source": nearest,
+            "distance": f"{dist_km:.2f} km",
+            "time": f"{int(time_min)} min"
+        }
+    except nx.NetworkXNoPath: raise HTTPException(status_code=404, detail="No path found")
+    except Exception as e: raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/ask-ai")
+async def ask_ai(req: AIQueryRequest):
+    if not MISTRAL_API_KEY:
+        raise HTTPException(status_code=503, detail="Mistral API key not configured")
+        
+    metrics = await get_all_metrics()
+    
+    system_prompt = f"""You are NagarIQ AI, an intelligent assistant for a Smart City dashboard. 
+You provide insights based on real-time city data. Be concise, helpful, and format your response in markdown.
+
+Current City Metrics Overview:
+{json.dumps(metrics.get("kpis", {}), indent=2)}
+
+Metro Status:
+{json.dumps(metrics.get("metro", {}), indent=2)}
+
+Recent Environmental Data (AQI, PM2.5, Temp):
+{json.dumps(metrics.get("environment", [])[:2], indent=2)}
+
+Recent Traffic Data (Congestion, Speed):
+{json.dumps(metrics.get("traffic", [])[:2], indent=2)}
+"""
+
+    url = "https://api.mistral.ai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {MISTRAL_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "mistral-large-latest",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": req.query}
+        ]
+    }
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=headers, json=payload, timeout=30.0)
+            if response.status_code == 200:
+                data = response.json()
+                answer = data["choices"][0]["message"]["content"]
+                return {"answer": answer}
+            else:
+                raise HTTPException(status_code=response.status_code, detail=f"Mistral API error: {response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to communicate with Mistral AI: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

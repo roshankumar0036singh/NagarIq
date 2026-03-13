@@ -1,0 +1,53 @@
+{
+  "resources": [
+    {
+      "id": "hosp-gmc",
+      "type": "hospital",
+      "name": "Government Medical College (GMC)",
+      "position": [79.0964, 21.1278],
+      "capacity": "High"
+    },
+    {
+      "id": "hosp-aiims",
+      "type": "hospital",
+      "name": "AIIMS Nagpur",
+      "position": [79.0275, 21.0561],
+      "capacity": "Medium"
+    },
+    {
+      "id": "hosp-kingsway",
+      "type": "hospital",
+      "name": "Kingsway Hospitals",
+      "position": [79.0855, 21.1578],
+      "capacity": "Medium"
+    },
+    {
+      "id": "hosp-sevenstar",
+      "type": "hospital",
+      "name": "SevenStar Hospital",
+      "position": [79.0885, 21.1390],
+      "capacity": "Medium"
+    },
+    {
+      "id": "fire-civil",
+      "type": "fire_station",
+      "name": "Civil Lines Fire Station",
+      "position": [79.0734, 21.1582],
+      "readiness": "Ready"
+    },
+    {
+      "id": "fire-sakka",
+      "type": "fire_station",
+      "name": "Sakkardara Fire Station",
+      "position": [79.1171, 21.1198],
+      "readiness": "Ready"
+    },
+    {
+      "id": "fire-narendra",
+      "type": "fire_station",
+      "name": "Narendra Nagar Fire Station",
+      "position": [79.0745, 21.1011],
+      "readiness": "Ready"
+    }
+  ]
+}

@@ -43,6 +43,12 @@ const DeckGLMap = () => {
   const [alternativePath, setAlternativePath] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
 
+  // Emergency Mode states
+  const [emergencyMode, setEmergencyMode] = useState(false);
+  const [incidentPoint, setIncidentPoint] = useState(null);
+  const [emergencyRoute, setEmergencyRoute] = useState(null);
+  const [emergencyInfo, setEmergencyInfo] = useState(null);
+
   // Animation Loop for TripsLayer
   useEffect(() => {
     let animation;
@@ -145,6 +151,9 @@ const DeckGLMap = () => {
     } else if (routingState === 'picking-end') {
       setEndPoint(info.coordinate);
       calculateRoute(startPoint, info.coordinate);
+    } else if (routingState === 'picking-incident') {
+      setIncidentPoint(info.coordinate);
+      calculateEmergencyRoute(info.coordinate);
     }
   };
 
@@ -418,6 +427,58 @@ const DeckGLMap = () => {
         blendFunc: [770, 1],
         blendEquation: 32774
       }
+    }),
+
+    // 14. Emergency Corridor Layer (Pulsing blue light)
+    emergencyRoute && new PathLayer({
+      id: 'emergency-corridor-glow',
+      data: [{ path: emergencyRoute }],
+      getPath: d => d.path,
+      getColor: [0, 180, 255, 180],
+      getWidth: 14 + Math.sin(time * 0.1) * 6, // Pulsing width
+      widthMinPixels: 10,
+      parameters: {
+        blendFunc: [770, 1],
+        blendEquation: 32774
+      }
+    }),
+    emergencyRoute && new PathLayer({
+      id: 'emergency-corridor-core',
+      data: [{ path: emergencyRoute }],
+      getPath: d => d.path,
+      getColor: [255, 255, 255],
+      getWidth: 3,
+      widthMinPixels: 2,
+    }),
+
+    // 15. Incident Marker
+    incidentPoint && new ScatterplotLayer({
+      id: 'incident-marker',
+      data: [{ position: incidentPoint }],
+      getPosition: d => d.position,
+      getFillColor: [239, 68, 68], // Red
+      getRadius: 40 + Math.sin(time * 0.1) * 10,
+      radiusMinPixels: 12,
+      stroked: true,
+      getLineColor: [255, 255, 255],
+      lineWidthMinPixels: 3,
+      parameters: {
+        blendFunc: [770, 1],
+        blendEquation: 32774
+      }
+    }),
+
+    // 16. Source Resource Marker
+    emergencyInfo && emergencyInfo.source && new ScatterplotLayer({
+      id: 'emergency-source-marker',
+      data: [{ position: emergencyInfo.source.position }],
+      getPosition: d => d.position,
+      getFillColor: [59, 130, 246], // Blue
+      getRadius: 30,
+      radiusMinPixels: 10,
+      stroked: true,
+      getLineColor: [255, 255, 255],
+      lineWidthMinPixels: 2
     })
   ];
 
@@ -502,9 +563,61 @@ const DeckGLMap = () => {
               {mode}
             </button>
           ))}
+          <button
+            onClick={() => {
+              setEmergencyMode(!emergencyMode);
+              if (emergencyMode) {
+                 setEmergencyRoute(null);
+                 setIncidentPoint(null);
+                 setEmergencyInfo(null);
+                 setRoutingState(null);
+              }
+            }}
+            style={{
+              background: emergencyMode ? '#EF4444' : 'rgba(239,68,68,0.1)',
+              color: emergencyMode ? 'white' : '#EF4444',
+              border: `1px solid ${emergencyMode ? 'transparent' : '#EF4444'}`,
+              padding: '0.5rem 1rem',
+              borderRadius: '12px',
+              fontSize: '0.7rem',
+              fontFamily: "'Roboto Mono', monospace",
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              transition: 'all 0.2s',
+              fontWeight: 700
+            }}
+          >
+            {emergencyMode ? 'EXIT ALERT' : 'EMERGENCY MODE'}
+          </button>
         </div>
 
-        {!routingState && (
+        {emergencyMode && !routingState && (
+           <button
+             onClick={() => {
+               setRoutingState('picking-incident');
+               setEmergencyRoute(null);
+               setIncidentPoint(null);
+               setEmergencyInfo(null);
+             }}
+             style={{
+               background: '#EF4444',
+               color: 'white',
+               border: 'none',
+               padding: '0.75rem 1.5rem',
+               borderRadius: '12px',
+               cursor: 'pointer',
+               fontWeight: 700,
+               fontSize: '0.75rem',
+               fontFamily: "'Roboto Mono', monospace",
+               boxShadow: '0 10px 30px rgba(239,68,68,0.4)',
+               animation: 'pulse 2s infinite'
+             }}
+           >
+             REPORT INCIDENT
+           </button>
+        )}
+
+        {!routingState && !emergencyMode && (
           <button
             onClick={() => {
               setRoutingState('picking-start');
@@ -549,6 +662,7 @@ const DeckGLMap = () => {
             }}>
               {routingState === 'picking-start' ? 'INTEL: SELECT ORIGIN' : 
                routingState === 'picking-end' ? 'INTEL: SELECT DESTINATION' : 
+               routingState === 'picking-incident' ? 'ALERT: SELECT INCIDENT LOCATION' :
                routingState === 'calculating' ? 'INTEL: RESOLVING NEURAL PATH' : 'INTEL: ROUTE OPTIMIZED'}
             </div>
             {routingState === 'resolved' && (
@@ -572,6 +686,22 @@ const DeckGLMap = () => {
               >
                 DISCARD ROUTE
               </button>
+            )}
+            {emergencyInfo && (
+              <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+                <div style={{ fontSize: '0.6rem', color: '#3B82F6', marginBottom: '0.5rem', fontWeight: 700 }}>NEAREST RESPONDER Dispatched</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'white' }}>{emergencyInfo.source.name}</div>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.5rem', opacity: 0.5 }}>EST. ARRIVAL</div>
+                    <div style={{ fontSize: '0.8rem', color: '#EF4444', fontWeight: 700 }}>{emergencyInfo.time}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.5rem', opacity: 0.5 }}>DISTANCE</div>
+                    <div style={{ fontSize: '0.8rem' }}>{emergencyInfo.distance}</div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
