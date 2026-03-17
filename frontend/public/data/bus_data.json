@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-03-17T17:44:59.186890",
+    "generated_at": "2026-03-17T18:38:18.553781",
     "city": "Nagpur"
   },
   "stops": [
@@ -171,144 +171,132 @@
       "routeId": "101",
       "routeName": "Pardi - Hingna",
       "position": [
-        79.11270843292118,
-        21.152291567078823
+        79.05746898714257,
+        21.132468987142573
       ],
-      "nextStop": "stop-014",
-      "occupancy": 22,
-      "delay": 3
+      "nextStop": "stop-016",
+      "occupancy": 27,
+      "delay": 8
     },
     {
       "id": "bus-101-1",
       "routeId": "101",
       "routeName": "Pardi - Hingna",
       "position": [
-        79.00299222540696,
-        21.110897667622087
+        79.077273451845,
+        21.14306836296125
       ],
-      "nextStop": "stop-003",
-      "occupancy": 29,
-      "delay": -1
+      "nextStop": "stop-009",
+      "occupancy": 13,
+      "delay": 0
     },
     {
       "id": "bus-202-0",
       "routeId": "202",
       "routeName": "Koradi - Airport",
       "position": [
-        79.09640695378603,
-        21.09543256837207
+        79.09449590697407,
+        21.126541931608728
       ],
-      "nextStop": "stop-006",
-      "occupancy": 43,
-      "delay": -1
+      "nextStop": "stop-010",
+      "occupancy": 44,
+      "delay": 2
     },
     {
       "id": "bus-202-1",
       "routeId": "202",
       "routeName": "Koradi - Airport",
       "position": [
-        79.09005753926701,
-        21.14011811518329
+        79.09583871560734,
+        21.120806421963277
       ],
-      "nextStop": "stop-010",
-      "occupancy": 58,
-      "delay": 4
+      "nextStop": "stop-011",
+      "occupancy": 47,
+      "delay": 5
     },
     {
       "id": "bus-303-0",
       "routeId": "303",
       "routeName": "Kamptee - Wadi",
       "position": [
-        79.08456250818159,
-        21.1448906270454
+        79.00258434718698,
+        21.150854896141396
       ],
-      "nextStop": "stop-009",
-      "occupancy": 41,
-      "delay": 2
+      "nextStop": "stop-008",
+      "occupancy": 13,
+      "delay": 8
     },
     {
       "id": "bus-303-1",
       "routeId": "303",
       "routeName": "Kamptee - Wadi",
       "position": [
-        79.15385042220034,
-        21.16385042220033
+        79.15725609765926,
+        21.16725609765926
       ],
       "nextStop": "stop-002",
-      "occupancy": 46,
-      "delay": 4
-    },
-    {
-      "id": "bus-303-2",
-      "routeId": "303",
-      "routeName": "Kamptee - Wadi",
-      "position": [
-        79.18520534156033,
-        21.201506676950416
-      ],
-      "nextStop": "stop-020",
-      "occupancy": 39,
-      "delay": -1
+      "occupancy": 14,
+      "delay": -2
     },
     {
       "id": "bus-404-0",
       "routeId": "404",
       "routeName": "Nandanvan - Trimurti Nagar",
       "position": [
-        79.08326708369985,
-        21.14311401416118
+        79.11441542886156,
+        21.12222636730549
       ],
-      "nextStop": "stop-016",
-      "occupancy": 46,
-      "delay": -2
+      "nextStop": "stop-010",
+      "occupancy": 55,
+      "delay": 6
     },
     {
       "id": "bus-404-1",
       "routeId": "404",
       "routeName": "Nandanvan - Trimurti Nagar",
       "position": [
-        79.12974967566267,
-        21.12003576061962
+        79.04626011077491,
+        21.12126011077491
       ],
-      "nextStop": "stop-010",
-      "occupancy": 37,
-      "delay": 2
+      "nextStop": "stop-017",
+      "occupancy": 57,
+      "delay": 8
     },
     {
       "id": "bus-505-0",
       "routeId": "505",
       "routeName": "Gittikhadan - Medical",
       "position": [
-        79.08383349763619,
-        21.15602400553476
+        79.09580502107691,
+        21.12564401686153
       ],
-      "nextStop": "stop-001",
-      "occupancy": 60,
-      "delay": 8
+      "nextStop": "stop-010",
+      "occupancy": 11,
+      "delay": 5
     },
     {
       "id": "bus-505-1",
       "routeId": "505",
       "routeName": "Gittikhadan - Medical",
       "position": [
-        79.07887780639133,
-        21.165561096804332
+        79.07957585447743,
+        21.165212072761285
       ],
       "nextStop": "stop-012",
-      "occupancy": 41,
-      "delay": 4
+      "occupancy": 55,
+      "delay": 5
     },
     {
       "id": "bus-505-2",
       "routeId": "505",
       "routeName": "Gittikhadan - Medical",
       "position": [
-        79.06333891460916,
-        21.17333054269542
+        79.08346442901902,
+        21.15688816619938
       ],
-      "nextStop": "stop-012",
-      "occupancy": 16,
-      "delay": -1
+      "nextStop": "stop-001",
+      "occupancy": 29,
+      "delay": -2
     }
   ],
   "arrivals": {
@@ -316,150 +304,150 @@
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "17:55",
-        "wait": 11,
+        "time": "18:47",
+        "wait": 9,
         "status": "On Time"
       },
       {
-        "routeId": "303",
-        "routeName": "Kamptee - Wadi",
-        "time": "17:55",
-        "wait": 11,
-        "status": "On Time"
-      },
-      {
-        "routeId": "404",
-        "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "17:55",
+        "routeId": "505",
+        "routeName": "Gittikhadan - Medical",
+        "time": "18:49",
         "wait": 11,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "17:56",
+        "time": "18:50",
         "wait": 12,
         "status": "On Time"
       },
       {
-        "routeId": "505",
-        "routeName": "Gittikhadan - Medical",
-        "time": "17:59",
-        "wait": 15,
-        "status": "Delayed"
-      },
-      {
-        "routeId": "101",
-        "routeName": "Pardi - Hingna",
-        "time": "18:06",
-        "wait": 22,
-        "status": "On Time"
-      },
-      {
-        "routeId": "202",
-        "routeName": "Koradi - Airport",
-        "time": "18:06",
-        "wait": 22,
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "18:51",
+        "wait": 13,
         "status": "On Time"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:08",
-        "wait": 24,
-        "status": "On Time"
-      },
-      {
-        "routeId": "505",
-        "routeName": "Gittikhadan - Medical",
-        "time": "18:10",
-        "wait": 26,
-        "status": "On Time"
-      },
-      {
-        "routeId": "303",
-        "routeName": "Kamptee - Wadi",
-        "time": "18:11",
-        "wait": 27,
+        "time": "18:52",
+        "wait": 14,
         "status": "On Time"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:17",
-        "wait": 33,
-        "status": "On Time"
-      },
-      {
-        "routeId": "505",
-        "routeName": "Gittikhadan - Medical",
-        "time": "18:17",
-        "wait": 33,
+        "time": "18:59",
+        "wait": 21,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:18",
-        "wait": 34,
+        "time": "18:59",
+        "wait": 21,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:19",
-        "wait": 35,
+        "time": "19:00",
+        "wait": 22,
+        "status": "On Time"
+      },
+      {
+        "routeId": "505",
+        "routeName": "Gittikhadan - Medical",
+        "time": "19:01",
+        "wait": 23,
+        "status": "On Time"
+      },
+      {
+        "routeId": "404",
+        "routeName": "Nandanvan - Trimurti Nagar",
+        "time": "19:03",
+        "wait": 25,
         "status": "Delayed"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:19",
+        "time": "19:13",
         "wait": 35,
         "status": "Delayed"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "19:15",
+        "wait": 37,
+        "status": "On Time"
+      },
+      {
+        "routeId": "505",
+        "routeName": "Gittikhadan - Medical",
+        "time": "19:16",
+        "wait": 38,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "19:17",
+        "wait": 39,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "19:17",
+        "wait": 39,
+        "status": "On Time"
       }
     ],
     "stop-002": [
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "17:53",
-        "wait": 9,
+        "time": "18:51",
+        "wait": 13,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "17:59",
+        "time": "18:53",
         "wait": 15,
         "status": "Delayed"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:07",
-        "wait": 23,
+        "time": "18:59",
+        "wait": 21,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:07",
-        "wait": 23,
-        "status": "On Time"
-      },
-      {
-        "routeId": "303",
-        "routeName": "Kamptee - Wadi",
-        "time": "18:17",
-        "wait": 33,
+        "time": "19:02",
+        "wait": 24,
         "status": "On Time"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:23",
-        "wait": 39,
+        "time": "19:11",
+        "wait": 33,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "19:12",
+        "wait": 34,
         "status": "On Time"
       }
     ],
@@ -467,21 +455,21 @@
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "17:59",
-        "wait": 15,
-        "status": "Delayed"
-      },
-      {
-        "routeId": "101",
-        "routeName": "Pardi - Hingna",
-        "time": "18:08",
-        "wait": 24,
+        "time": "18:47",
+        "wait": 9,
         "status": "On Time"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:21",
+        "time": "19:04",
+        "wait": 26,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "19:15",
         "wait": 37,
         "status": "On Time"
       }
@@ -490,44 +478,44 @@
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "17:53",
-        "wait": 9,
-        "status": "On Time"
-      },
-      {
-        "routeId": "202",
-        "routeName": "Koradi - Airport",
-        "time": "18:05",
-        "wait": 21,
-        "status": "On Time"
-      },
-      {
-        "routeId": "202",
-        "routeName": "Koradi - Airport",
-        "time": "18:19",
-        "wait": 35,
+        "time": "18:53",
+        "wait": 15,
         "status": "Delayed"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "19:02",
+        "wait": 24,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "19:12",
+        "wait": 34,
+        "status": "On Time"
       }
     ],
     "stop-005": [
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "17:53",
+        "time": "18:47",
         "wait": 9,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:10",
-        "wait": 26,
+        "time": "19:05",
+        "wait": 27,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:19",
+        "time": "19:13",
         "wait": 35,
         "status": "Delayed"
       }
@@ -536,22 +524,22 @@
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "17:53",
-        "wait": 9,
+        "time": "18:49",
+        "wait": 11,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:08",
-        "wait": 24,
+        "time": "19:04",
+        "wait": 26,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:20",
-        "wait": 36,
+        "time": "19:16",
+        "wait": 38,
         "status": "On Time"
       }
     ],
@@ -559,45 +547,45 @@
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "17:55",
-        "wait": 11,
+        "time": "18:52",
+        "wait": 14,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:10",
-        "wait": 26,
+        "time": "19:05",
+        "wait": 27,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:19",
-        "wait": 35,
-        "status": "Delayed"
+        "time": "19:14",
+        "wait": 36,
+        "status": "On Time"
       }
     ],
     "stop-008": [
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "17:55",
-        "wait": 11,
+        "time": "18:52",
+        "wait": 14,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:10",
-        "wait": 26,
+        "time": "19:02",
+        "wait": 24,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:21",
-        "wait": 37,
+        "time": "19:14",
+        "wait": 36,
         "status": "On Time"
       }
     ],
@@ -605,43 +593,43 @@
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "17:56",
+        "time": "18:50",
         "wait": 12,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "17:58",
+        "time": "18:52",
         "wait": 14,
         "status": "On Time"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:09",
-        "wait": 25,
-        "status": "Delayed"
-      },
-      {
-        "routeId": "303",
-        "routeName": "Kamptee - Wadi",
-        "time": "18:09",
-        "wait": 25,
-        "status": "Delayed"
-      },
-      {
-        "routeId": "101",
-        "routeName": "Pardi - Hingna",
-        "time": "18:21",
-        "wait": 37,
+        "time": "18:59",
+        "wait": 21,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:21",
-        "wait": 37,
+        "time": "19:05",
+        "wait": 27,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "19:17",
+        "wait": 39,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "19:17",
+        "wait": 39,
         "status": "On Time"
       }
     ],
@@ -649,63 +637,63 @@
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "17:55",
+        "time": "18:49",
         "wait": 11,
         "status": "On Time"
       },
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "17:56",
+        "time": "18:50",
         "wait": 12,
         "status": "On Time"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "17:58",
-        "wait": 14,
+        "time": "18:51",
+        "wait": 13,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:05",
-        "wait": 21,
+        "time": "19:02",
+        "wait": 24,
         "status": "On Time"
       },
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "18:05",
-        "wait": 21,
-        "status": "On Time"
-      },
-      {
-        "routeId": "404",
-        "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:07",
-        "wait": 23,
-        "status": "On Time"
-      },
-      {
-        "routeId": "202",
-        "routeName": "Koradi - Airport",
-        "time": "18:19",
-        "wait": 35,
+        "time": "19:03",
+        "wait": 25,
         "status": "Delayed"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:21",
-        "wait": 37,
+        "time": "19:05",
+        "wait": 27,
+        "status": "On Time"
+      },
+      {
+        "routeId": "404",
+        "routeName": "Nandanvan - Trimurti Nagar",
+        "time": "19:12",
+        "wait": 34,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "19:17",
+        "wait": 39,
         "status": "On Time"
       },
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "18:23",
+        "time": "19:17",
         "wait": 39,
         "status": "On Time"
       }
@@ -714,66 +702,66 @@
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "17:55",
-        "wait": 11,
-        "status": "On Time"
-      },
-      {
-        "routeId": "202",
-        "routeName": "Koradi - Airport",
-        "time": "18:05",
-        "wait": 21,
-        "status": "On Time"
-      },
-      {
-        "routeId": "202",
-        "routeName": "Koradi - Airport",
-        "time": "18:17",
-        "wait": 33,
-        "status": "On Time"
-      }
-    ],
-    "stop-012": [
-      {
-        "routeId": "505",
-        "routeName": "Gittikhadan - Medical",
-        "time": "17:54",
-        "wait": 10,
-        "status": "Delayed"
-      },
-      {
-        "routeId": "202",
-        "routeName": "Koradi - Airport",
-        "time": "17:57",
+        "time": "18:51",
         "wait": 13,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:05",
-        "wait": 21,
-        "status": "On Time"
-      },
-      {
-        "routeId": "505",
-        "routeName": "Gittikhadan - Medical",
-        "time": "18:06",
-        "wait": 22,
+        "time": "19:04",
+        "wait": 26,
         "status": "On Time"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:18",
-        "wait": 34,
+        "time": "19:15",
+        "wait": 37,
+        "status": "On Time"
+      }
+    ],
+    "stop-012": [
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "18:49",
+        "wait": 11,
         "status": "On Time"
       },
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "18:23",
-        "wait": 39,
+        "time": "18:50",
+        "wait": 12,
+        "status": "On Time"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "19:02",
+        "wait": 24,
+        "status": "On Time"
+      },
+      {
+        "routeId": "505",
+        "routeName": "Gittikhadan - Medical",
+        "time": "19:03",
+        "wait": 25,
+        "status": "Delayed"
+      },
+      {
+        "routeId": "202",
+        "routeName": "Koradi - Airport",
+        "time": "19:11",
+        "wait": 33,
+        "status": "On Time"
+      },
+      {
+        "routeId": "505",
+        "routeName": "Gittikhadan - Medical",
+        "time": "19:12",
+        "wait": 34,
         "status": "On Time"
       }
     ],
@@ -781,87 +769,87 @@
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "17:53",
-        "wait": 9,
-        "status": "On Time"
-      },
-      {
-        "routeId": "101",
-        "routeName": "Pardi - Hingna",
-        "time": "17:55",
-        "wait": 11,
-        "status": "On Time"
-      },
-      {
-        "routeId": "303",
-        "routeName": "Kamptee - Wadi",
-        "time": "18:08",
-        "wait": 24,
-        "status": "On Time"
-      },
-      {
-        "routeId": "101",
-        "routeName": "Pardi - Hingna",
-        "time": "18:10",
-        "wait": 26,
-        "status": "On Time"
-      },
-      {
-        "routeId": "101",
-        "routeName": "Pardi - Hingna",
-        "time": "18:21",
-        "wait": 37,
-        "status": "On Time"
-      },
-      {
-        "routeId": "303",
-        "routeName": "Kamptee - Wadi",
-        "time": "18:21",
-        "wait": 37,
-        "status": "On Time"
-      }
-    ],
-    "stop-014": [
-      {
-        "routeId": "101",
-        "routeName": "Pardi - Hingna",
-        "time": "17:56",
-        "wait": 12,
-        "status": "On Time"
-      },
-      {
-        "routeId": "505",
-        "routeName": "Gittikhadan - Medical",
-        "time": "17:59",
-        "wait": 15,
+        "time": "18:48",
+        "wait": 10,
         "status": "Delayed"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:05",
+        "time": "18:49",
+        "wait": 11,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "19:00",
+        "wait": 22,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "19:05",
+        "wait": 27,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "19:11",
+        "wait": 33,
+        "status": "On Time"
+      },
+      {
+        "routeId": "303",
+        "routeName": "Kamptee - Wadi",
+        "time": "19:14",
+        "wait": 36,
+        "status": "On Time"
+      }
+    ],
+    "stop-014": [
+      {
+        "routeId": "505",
+        "routeName": "Gittikhadan - Medical",
+        "time": "18:48",
+        "wait": 10,
+        "status": "Delayed"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "18:52",
+        "wait": 14,
+        "status": "On Time"
+      },
+      {
+        "routeId": "101",
+        "routeName": "Pardi - Hingna",
+        "time": "18:59",
         "wait": 21,
         "status": "On Time"
       },
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "18:09",
-        "wait": 25,
-        "status": "Delayed"
+        "time": "19:00",
+        "wait": 22,
+        "status": "On Time"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:19",
-        "wait": 35,
-        "status": "Delayed"
+        "time": "19:11",
+        "wait": 33,
+        "status": "On Time"
       },
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "18:21",
-        "wait": 37,
+        "time": "19:14",
+        "wait": 36,
         "status": "On Time"
       }
     ],
@@ -869,22 +857,22 @@
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "17:58",
+        "time": "18:52",
         "wait": 14,
         "status": "On Time"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:08",
-        "wait": 24,
+        "time": "18:59",
+        "wait": 21,
         "status": "On Time"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:20",
-        "wait": 36,
+        "time": "19:16",
+        "wait": 38,
         "status": "On Time"
       }
     ],
@@ -892,43 +880,43 @@
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "17:54",
-        "wait": 10,
-        "status": "Delayed"
+        "time": "18:49",
+        "wait": 11,
+        "status": "On Time"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "17:59",
-        "wait": 15,
-        "status": "Delayed"
+        "time": "18:50",
+        "wait": 12,
+        "status": "On Time"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:06",
+        "time": "19:00",
         "wait": 22,
         "status": "On Time"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:08",
-        "wait": 24,
+        "time": "19:05",
+        "wait": 27,
         "status": "On Time"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:19",
+        "time": "19:13",
         "wait": 35,
         "status": "Delayed"
       },
       {
         "routeId": "101",
         "routeName": "Pardi - Hingna",
-        "time": "18:21",
-        "wait": 37,
+        "time": "19:17",
+        "wait": 39,
         "status": "On Time"
       }
     ],
@@ -936,21 +924,21 @@
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "17:54",
-        "wait": 10,
+        "time": "18:53",
+        "wait": 15,
         "status": "Delayed"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:09",
-        "wait": 25,
-        "status": "Delayed"
+        "time": "19:05",
+        "wait": 27,
+        "status": "On Time"
       },
       {
         "routeId": "404",
         "routeName": "Nandanvan - Trimurti Nagar",
-        "time": "18:17",
+        "time": "19:11",
         "wait": 33,
         "status": "On Time"
       }
@@ -959,22 +947,22 @@
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "17:56",
+        "time": "18:50",
         "wait": 12,
         "status": "On Time"
       },
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "18:09",
-        "wait": 25,
-        "status": "Delayed"
+        "time": "19:02",
+        "wait": 24,
+        "status": "On Time"
       },
       {
         "routeId": "505",
         "routeName": "Gittikhadan - Medical",
-        "time": "18:23",
-        "wait": 39,
+        "time": "19:14",
+        "wait": 36,
         "status": "On Time"
       }
     ],
@@ -982,45 +970,45 @@
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "17:58",
-        "wait": 14,
-        "status": "On Time"
+        "time": "18:48",
+        "wait": 10,
+        "status": "Delayed"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:07",
-        "wait": 23,
-        "status": "On Time"
+        "time": "19:03",
+        "wait": 25,
+        "status": "Delayed"
       },
       {
         "routeId": "202",
         "routeName": "Koradi - Airport",
-        "time": "18:20",
-        "wait": 36,
-        "status": "On Time"
+        "time": "19:13",
+        "wait": 35,
+        "status": "Delayed"
       }
     ],
     "stop-020": [
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "17:55",
-        "wait": 11,
+        "time": "18:52",
+        "wait": 14,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:10",
-        "wait": 26,
+        "time": "19:00",
+        "wait": 22,
         "status": "On Time"
       },
       {
         "routeId": "303",
         "routeName": "Kamptee - Wadi",
-        "time": "18:23",
-        "wait": 39,
+        "time": "19:12",
+        "wait": 34,
         "status": "On Time"
       }
     ]
